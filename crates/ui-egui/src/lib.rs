@@ -1887,10 +1887,7 @@ impl FilmcraftApp {
             header::show(self, ui, header);
         }
         let status_h = if self.ui.show_status_bar { 20.0 } else { 0.0 };
-        // Evora fork (EVORA-COR-50, exception E2-L5-GEO): in Evora's shell the panels float on the
-        // backdrop as far from the window's edges as from each other (1 pt upstream)
-        let m = if theme::evora_enabled() { t.gap } else { 1.0 };
-        let body = egui::Rect::from_min_max(egui::pos2(full.min.x + m, header.max.y + m), egui::pos2(full.max.x - m, full.max.y - status_h - m - 1.0));
+        let body = egui::Rect::from_min_max(egui::pos2(full.min.x + 1.0, header.max.y + 1.0), egui::pos2(full.max.x - 1.0, full.max.y - status_h - 2.0));
         match self.ui.mode {
             state::Mode::Edit => self.dock_area(ui, body),
             state::Mode::Import => panels::import_mode::show(self, ui, body),

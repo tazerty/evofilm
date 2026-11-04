@@ -915,15 +915,11 @@ fn bin_card(app: &mut FilmcraftApp, ui: &mut egui::Ui, r: Rect, b: &Bin, v: &Vie
     let resp = ui.interact(r.expand(2.0), egui::Id::new((&v.prefix, "bincard", b.id.0)), Sense::click_and_drag());
     let selected = app.ui.project_panel.selected_bin == Some(b.id.0);
     let bg = Rect::from_min_max(th.min - vec2(6.0, 6.0), pos2(th.max.x + 6.0, r.max.y + 2.0));
-    // Evora fork (EVORA-COR-53, exception E2-L5-GEO): in Evora's shell a bin's tile is a soft well of the
-    // theme (a near-black block on the light theme's white panels read as a hole), at the controls' radius
-    let ev = crate::theme::evora_enabled();
-    let (card_r, tile_r, tile) = if ev { (t.radius_sm + 2.0, t.radius_sm, t.hover) } else { (4.0, 2.0, Color32::from_gray(26)) };
-    ui.painter().rect_filled(bg, card_r, if selected { t.tl_header_bg } else { t.panel_bg });
+    ui.painter().rect_filled(bg, 4.0, if selected { t.tl_header_bg } else { t.panel_bg });
     if selected {
-        ui.painter().rect_stroke(bg, card_r, Stroke::new(1.5, t.accent), StrokeKind::Inside);
+        ui.painter().rect_stroke(bg, 4.0, Stroke::new(1.5, t.accent), StrokeKind::Inside);
     }
-    ui.painter().rect_filled(th, tile_r, tile);
+    ui.painter().rect_filled(th, 2.0, Color32::from_gray(26));
     icons::paint(ui.painter(), Rect::from_center_size(th.center(), vec2(th.height() * 0.6, th.height() * 0.6)), Icon::Folder, BIN_COLOR);
     let mut n = Vec::new();
     b.all_items(&mut n);

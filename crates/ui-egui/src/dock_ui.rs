@@ -238,8 +238,6 @@ impl FilmcraftApp {
             }
         }
         for group in &groups {
-            // Evora fork (EVORA-COR-50): rounded corners and edge first, the focus over them
-            dock::paint_group_frame(ui, group, &t);
             dock::paint_group_focus(ui, group, self.ui.focused, &t);
         }
         let floating_order = self.floating_order(&ctx);
@@ -299,9 +297,7 @@ impl FilmcraftApp {
         let floating = self.ui.floating.get(index)?.clone();
         let panel = *floating.panels.first()?;
         let rect = floating_rect(&floating, ctx.content_rect());
-        // Evora fork (EVORA-COR-53): a floating panel stays square, its bodies' square backgrounds cannot
-        // be trimmed over what lies beneath it (the radius is already 0 upstream)
-        let t = crate::theme::Tokens { radius: 0.0, ..self.tokens };
+        let t = self.tokens;
         let id = egui::Id::new(("floating-panel", panel.id()));
         let mut output = None;
         egui::Area::new(id).order(egui::Order::Middle).fixed_pos(rect.min).constrain(false).interactable(true).show(ctx, |ui| {
@@ -324,10 +320,7 @@ impl FilmcraftApp {
             if let Some(active) = group.panels.get(group.active).copied() {
                 self.panel_body(ui, active, group.content);
             }
-            // Evora fork (EVORA-COR-50): a floating panel's outline is its edge's hairline in Evora's
-            // shell (its focus is painted below, as for a docked panel)
-            let outline = if crate::theme::evora_enabled() { crate::theme::panel_edge(t.kind) } else { t.focus };
-            ui.painter().rect_stroke(rect, t.radius, Stroke::new(1.0, outline), StrokeKind::Outside);
+            ui.painter().rect_stroke(rect, t.radius, Stroke::new(1.0, t.focus), StrokeKind::Outside);
             let grip = Rect::from_min_max(rect.max - vec2(14.0, 14.0), rect.max);
             let response = ui.interact(grip, id.with("resize"), Sense::click_and_drag());
             response.widget_info(|| egui::WidgetInfo::labeled(egui::WidgetType::Button, response.enabled(), tl!("Resize floating panel")));
