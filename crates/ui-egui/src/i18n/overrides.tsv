@@ -230,3 +230,35 @@ pt-br	Opened {url}	Link externo não aberto: {url}
 zh-cn	Opened {url}	未打开外部链接：{url}
 it	Opened {url}	Collegamento esterno non aperto: {url}
 ko	Opened {url}	외부 링크를 열지 않음: {url}
+
+# --- EVORA-COR-50: empty states as plain words, without the parentheses of a placeholder --------
+en	(no clips)	No clips
+es	(no clips)	Sin clips
+fr	(no clips)	Aucun clip
+id	(no clips)	Tidak ada klip
+ja	(no clips)	クリップなし
+pt-br	(no clips)	Nenhum clipe
+zh-cn	(no clips)	无剪辑
+it	(no clips)	Nessuna clip
+ko	(no clips)	클립 없음
+de	(no clips)	Keine Clips
+en	(no sequences)	No sequences
+es	(no sequences)	Sin secuencias
+fr	(no sequences)	Aucune séquence
+id	(no sequences)	Tidak ada sekuens
+ja	(no sequences)	シーケンスなし
+pt-br	(no sequences)	Nenhuma sequência
+zh-cn	(no sequences)	无序列
+it	(no sequences)	Nessuna sequenza
+ko	(no sequences)	시퀀스 없음
+de	(no sequences)	Keine Sequenzen
+en	Timeline: (no sequences)	Timeline: no sequences
+es	Timeline: (no sequences)	Línea de tiempo: sin secuencias
+fr	Timeline: (no sequences)	Timeline : aucune séquence
+id	Timeline: (no sequences)	Linimasa: tidak ada sekuens
+ja	Timeline: (no sequences)	タイムライン: シーケンスなし
+pt-br	Timeline: (no sequences)	Linha do tempo: nenhuma sequência
+zh-cn	Timeline: (no sequences)	时间轴：无序列
+it	Timeline: (no sequences)	Timeline: nessuna sequenza
+ko	Timeline: (no sequences)	타임라인: 시퀀스 없음
+de	Timeline: (no sequences)	Timeline: keine Sequenzen
