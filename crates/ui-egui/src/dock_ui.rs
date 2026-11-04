@@ -299,7 +299,9 @@ impl FilmcraftApp {
         let floating = self.ui.floating.get(index)?.clone();
         let panel = *floating.panels.first()?;
         let rect = floating_rect(&floating, ctx.content_rect());
-        let t = self.tokens;
+        // Evora fork (EVORA-COR-53): a floating panel stays square, its bodies' square backgrounds cannot
+        // be trimmed over what lies beneath it (the radius is already 0 upstream)
+        let t = crate::theme::Tokens { radius: 0.0, ..self.tokens };
         let id = egui::Id::new(("floating-panel", panel.id()));
         let mut output = None;
         egui::Area::new(id).order(egui::Order::Middle).fixed_pos(rect.min).constrain(false).interactable(true).show(ctx, |ui| {

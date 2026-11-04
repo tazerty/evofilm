@@ -920,18 +920,18 @@ pub(crate) fn paint_group_focus(ui: &egui::Ui, group: &Group, focused: PanelKind
 
 /// Evora fork (EVORA-COR-50, exception E2-L5-GEO): a docked group as a rounded card. Painted after
 /// the group's contents, whose bodies fill square backgrounds up to the frame, and before its focus:
-/// a band of the backdrop around the frame, half the radius wide (past the arc, `r·(√2−1)`, and
-/// inside the gutter), trims those corners to the frame's arc; then a hairline draws the edge.
-/// Nothing is painted outside Evora's shell, nor without rounded corners.
+/// a band of the backdrop, as wide as the radius, whose inner edge is the frame's arc, trims those
+/// square corners (the corner lies `r·√2` from the arc's centre, the band reaches `2r`); it is clipped
+/// to the frame (EVORA-COR-53), so it never paints over the gutters, where the resize handles have
+/// already drawn their hover, drag and keyboard-focus fill. Then a hairline draws the edge. Nothing is
+/// painted outside Evora's shell, nor without rounded corners.
 pub(crate) fn paint_group_frame(ui: &egui::Ui, group: &Group, tokens: &Tokens) {
     if !crate::theme::evora_enabled() || tokens.radius <= 0.0 {
         return;
     }
     let r = tokens.radius;
-    let band = (r * 0.5).min(tokens.gap - 1.0).max(1.0);
-    let painter = ui.painter();
-    painter.rect_stroke(group.rect.expand(band), r + band, Stroke::new(band, tokens.app_bg), StrokeKind::Inside);
-    painter.rect_stroke(group.rect, r, Stroke::new(1.0, crate::theme::panel_edge(tokens.kind)), StrokeKind::Inside);
+    ui.painter().with_clip_rect(group.rect).rect_stroke(group.rect.expand(r), r + r, Stroke::new(r, tokens.app_bg), StrokeKind::Inside);
+    ui.painter().rect_stroke(group.rect, r, Stroke::new(1.0, crate::theme::panel_edge(tokens.kind)), StrokeKind::Inside);
 }
 
 fn paint_widget_focus(painter: &egui::Painter, response: &egui::Response, tokens: &Tokens) {

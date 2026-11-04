@@ -458,10 +458,10 @@ mod tests {
             assert_ne!(t.app_bg, t.panel_bg, "{kind:?}: the panels stand out from the backdrop");
             assert_ne!(panel_edge(kind), t.panel_bg, "{kind:?}: the edge is drawn");
         }
-        // the band of backdrop that trims the bodies' square corners (dock::paint_group_frame) is
-        // half the radius: it reaches past the arc (r·(√2−1)) and stays inside the gutter
-        assert!(RADIUS * 0.5 >= RADIUS * (std::f32::consts::SQRT_2 - 1.0));
-        assert!(RADIUS * 0.5 < GAP);
+        // the band of backdrop that trims the bodies' square corners (dock::paint_group_frame), as wide
+        // as the radius and clipped to the frame, reaches past each corner (r·√2 < 2r from the arc's centre)
+        assert!(RADIUS * std::f32::consts::SQRT_2 < 2.0 * RADIUS);
+        assert!(GAP > 0.0 && RADIUS_SM < RADIUS);
     }
 
     #[test]
