@@ -641,19 +641,25 @@ pub fn draw_group_chrome_details(ui: &mut egui::Ui, g: &Group, seqs: &SeqTabs, t
             None => actions.push(DockAction::Activate(tab.panel)),
         };
         let active_at = tabs.iter().position(|tab| tab.active).unwrap_or(0);
-        let text_y = strip.min.y + 16.0;
+        // Evora fork (EVORA-COR-50, exception E2-L5-GEO): in Evora's shell the tabs are a segmented
+        // control centred in the strip, the shown tab in Inter Medium on the selected segment, its
+        // panel menu a chevron inside that segment, no underline. Upstream's strip is unchanged.
+        let ev = crate::theme::evora_enabled();
+        let (tab_pad, menu_w, tab_gap) = if ev { (20.0, 16.0, 2.0) } else { (16.0, 20.0, 8.0) };
+        let tab_font = |active: bool| if ev && active { Tokens::medium(12.0) } else { Tokens::ui(12.0) };
+        let text_y = if ev { strip.center().y } else { strip.min.y + 16.0 };
         // Which tabs fit. The active tab is always shown: tabs before it are left out until it
         // fits, then as many after it as there is room for. Tabs that are left out are reached
         // through the » list at the right end of the strip.
         let widths: Vec<f32> = tabs
             .iter()
             .map(|tab| {
-                let label = painter.layout_no_wrap(tab.title.clone(), Tokens::ui(12.0), t.tab_text).size().x;
-                label + 16.0 + if tab.active { 20.0 } else { 0.0 } + if tab.active && tab.seq.is_some() { 16.0 } else { 0.0 }
+                let label = painter.layout_no_wrap(tab.title.clone(), tab_font(tab.active), t.tab_text).size().x;
+                label + tab_pad + if tab.active { menu_w } else { 0.0 } + if tab.active && tab.seq.is_some() { 16.0 } else { 0.0 }
             })
             .collect();
-        let span = |from: usize, to: usize| widths.get(from..=to).map_or(0.0, |w| w.iter().sum::<f32>() + 8.0 * w.len() as f32);
-        let room = strip.width() - 12.0;
+        let span = |from: usize, to: usize| widths.get(from..=to).map_or(0.0, |w| w.iter().sum::<f32>() + tab_gap * w.len() as f32);
+        let room = strip.width() - if ev { 20.0 } else { 12.0 };
         let all_fit = span(0, tabs.len().saturating_sub(1)) <= room;
         let room = if all_fit { room } else { room - 24.0 };
         let mut first = 0;
@@ -665,7 +671,13 @@ pub fn draw_group_chrome_details(ui: &mut egui::Ui, g: &Group, seqs: &SeqTabs, t
             last += 1;
         }
         let list_id = egui::Id::new(("tab-list", g.path.clone()));
-        let more = (!all_fit).then(|| Rect::from_min_size(pos2(strip.max.x - 22.0, strip.min.y + 6.0), vec2(18.0, 20.0)));
+        let more = (!all_fit).then(|| {
+            if ev {
+                Rect::from_center_size(pos2(strip.max.x - 15.0, text_y), vec2(18.0, 20.0))
+            } else {
+                Rect::from_min_size(pos2(strip.max.x - 22.0, strip.min.y + 6.0), vec2(18.0, 20.0))
+            }
+        });
         let mut list_opened = false;
         if let Some(r) = more {
             let resp = ui.interact(r, egui::Id::new(("tab-overflow", g.path.clone())), Sense::click());
@@ -698,14 +710,21 @@ pub fn draw_group_chrome_details(ui: &mut egui::Ui, g: &Group, seqs: &SeqTabs, t
         } else {
             ui.ctx().data_mut(|d| d.remove::<f32>(wheel_id));
         }
-        let mut x = strip.min.x + 12.0;
+        let mut x = strip.min.x + if ev { 10.0 } else { 12.0 };
+        // Evora: the track behind the shown tabs (a lone tab is a pop-up button: its segment only)
+        let (track, thumb, thumb_edge) = crate::theme::segmented(t.kind);
+        if ev && last > first {
+            let inner = widths.get(first..=last).map_or(0.0, |w| w.iter().sum::<f32>() + tab_gap * (w.len() as f32 - 1.0));
+            let track_rect = Rect::from_min_max(pos2(x - 3.0, text_y - 14.0), pos2(x + inner + 3.0, text_y + 14.0));
+            painter.rect_filled(track_rect, t.radius_sm + 3.0, track);
+        }
         // sequence tabs as drawn (for dragging one past its neighbours), and the one being dragged
         let mut seq_rects: Vec<(u64, Rect)> = Vec::new();
         let mut dragged: Option<u64> = None;
         for (i, tab) in tabs.iter().enumerate().take(last + 1).skip(first) {
             let p = &tab.panel;
             let is_active = tab.active;
-            let galley = painter.layout_no_wrap(tab.title.clone(), Tokens::ui(12.0), if is_active { t.tab_text_active } else { t.tab_text });
+            let galley = painter.layout_no_wrap(tab.title.clone(), tab_font(is_active), if is_active { t.tab_text_active } else { t.tab_text });
             let close_w = if is_active && tab.seq.is_some() { 16.0 } else { 0.0 };
             let w = widths.get(i).copied().unwrap_or(0.0);
             let tab_rect = Rect::from_min_size(pos2(x, strip.min.y), vec2(w, t.tab_h));
@@ -727,6 +746,11 @@ pub fn draw_group_chrome_details(ui: &mut egui::Ui, g: &Group, seqs: &SeqTabs, t
                 node.set_role(egui::accesskit::Role::Tab);
                 node.set_selected(is_active);
             });
+            if ev && is_active {
+                let segment = Rect::from_center_size(pos2(tab_rect.center().x, text_y), vec2(w, 22.0));
+                painter.rect_filled(segment, t.radius_sm, thumb);
+                painter.rect_stroke(segment, t.radius_sm, Stroke::new(1.0, thumb_edge), StrokeKind::Inside);
+            }
             paint_widget_focus(&painter, &resp, t);
             if let Some(id) = tab.seq {
                 seq_rects.push((id, tab_rect));
@@ -753,14 +777,14 @@ pub fn draw_group_chrome_details(ui: &mut egui::Ui, g: &Group, seqs: &SeqTabs, t
             if tab.seq.is_none() || is_active {
                 reg.add_response(&format!("panel.tab.{}", p.id()), &resp, p.title());
             }
-            let label_x = tab_rect.min.x + 8.0 + close_w;
+            let label_x = tab_rect.min.x + tab_pad / 2.0 + close_w;
             let label_w = galley.size().x;
             let col = if is_active || resp.hovered() { t.tab_text_active } else { t.tab_text };
             painter.galley_with_override_text_color(pos2(label_x, text_y - galley.size().y / 2.0), galley, col);
             let mut closed = false;
             if let Some(id) = tab.seq.filter(|_| is_active) {
                 // × closes the sequence's tab (the sequence stays in the project)
-                let cr = Rect::from_center_size(pos2(tab_rect.min.x + 10.0, text_y), vec2(8.0, 8.0));
+                let cr = Rect::from_center_size(pos2(tab_rect.min.x + if ev { 12.0 } else { 10.0 }, text_y), vec2(8.0, 8.0));
                 let cresp = ui.interact(cr.expand(4.0), egui::Id::new(("tab-close", g.path.clone(), id)), Sense::click());
                 cresp.widget_info(|| egui::WidgetInfo::labeled(egui::WidgetType::Button, cresp.enabled(), "close sequence"));
                 reg.add_response(&format!("timeline.tab.{id}.close"), &cresp, "close sequence");
@@ -774,15 +798,24 @@ pub fn draw_group_chrome_details(ui: &mut egui::Ui, g: &Group, seqs: &SeqTabs, t
                 }
             }
             if is_active {
-                let mr = Rect::from_center_size(pos2(label_x + label_w + 12.0, text_y), vec2(12.0, 10.0));
+                let mr = if ev {
+                    Rect::from_center_size(pos2(label_x + label_w + 10.0, text_y), vec2(10.0, 10.0))
+                } else {
+                    Rect::from_center_size(pos2(label_x + label_w + 12.0, text_y), vec2(12.0, 10.0))
+                };
                 let mresp = ui.interact(mr.expand(3.0), egui::Id::new(("tab-menu", g.path.clone())), Sense::click());
                 mresp.widget_info(|| egui::WidgetInfo::labeled(egui::WidgetType::Button, mresp.enabled(), "panel menu"));
                 reg.add_response(&format!("panel.menu.{}", p.id()), &mresp, "panel menu");
-                let mc = if mresp.hovered() { t.tab_text_active } else { t.tab_text };
-                icons::paint(&painter, Rect::from_center_size(mr.center(), vec2(16.0, 16.0)), Icon::Hamburger, mc);
-                // 1 pt underline spanning label + ≡, 23 pt below the frame top
-                let uy = strip.min.y + 23.0;
-                painter.line_segment([pos2(label_x, uy), pos2(mr.max.x, uy)], Stroke::new(1.0, t.tab_text_active));
+                if ev {
+                    // a pop-up button's chevron, on the selected segment
+                    icons::paint(&painter, Rect::from_center_size(mr.center(), vec2(12.0, 12.0)), Icon::ChevronDown, t.tab_text_active);
+                } else {
+                    let mc = if mresp.hovered() { t.tab_text_active } else { t.tab_text };
+                    icons::paint(&painter, Rect::from_center_size(mr.center(), vec2(16.0, 16.0)), Icon::Hamburger, mc);
+                    // 1 pt underline spanning label + ≡, 23 pt below the frame top
+                    let uy = strip.min.y + 23.0;
+                    painter.line_segment([pos2(label_x, uy), pos2(mr.max.x, uy)], Stroke::new(1.0, t.tab_text_active));
+                }
                 paint_widget_focus(&painter, &mresp, t);
                 if mresp.clicked() {
                     actions.push(DockAction::PanelMenu(*p, mr.left_bottom()));
@@ -806,7 +839,7 @@ pub fn draw_group_chrome_details(ui: &mut egui::Ui, g: &Group, seqs: &SeqTabs, t
                     None => actions.push(DockAction::Close(*p)),
                 }
             }
-            x += w + 8.0;
+            x += w + tab_gap;
         }
         // Dragging a sequence tab sideways: it changes places with a neighbour when the pointer
         // passes that neighbour's middle.
@@ -877,10 +910,28 @@ pub fn draw_group_chrome_details(ui: &mut egui::Ui, g: &Group, seqs: &SeqTabs, t
 }
 
 /// Paint once after the group's contents so child backgrounds cannot hide its focus (#1075).
+/// Evora fork (EVORA-COR-50, exception E2-L5-GEO): the outline follows the frame's corners
+/// (`tokens.radius`, 0 upstream).
 pub(crate) fn paint_group_focus(ui: &egui::Ui, group: &Group, focused: PanelKind, tokens: &Tokens) {
     if group.panels.get(group.active).copied() == Some(focused) {
-        ui.painter().rect_stroke(group.rect, 0.0, Stroke::new(1.0, tokens.focus), StrokeKind::Inside);
+        ui.painter().rect_stroke(group.rect, tokens.radius, Stroke::new(1.0, tokens.focus), StrokeKind::Inside);
     }
+}
+
+/// Evora fork (EVORA-COR-50, exception E2-L5-GEO): a docked group as a rounded card. Painted after
+/// the group's contents, whose bodies fill square backgrounds up to the frame, and before its focus:
+/// a band of the backdrop around the frame, half the radius wide (past the arc, `r·(√2−1)`, and
+/// inside the gutter), trims those corners to the frame's arc; then a hairline draws the edge.
+/// Nothing is painted outside Evora's shell, nor without rounded corners.
+pub(crate) fn paint_group_frame(ui: &egui::Ui, group: &Group, tokens: &Tokens) {
+    if !crate::theme::evora_enabled() || tokens.radius <= 0.0 {
+        return;
+    }
+    let r = tokens.radius;
+    let band = (r * 0.5).min(tokens.gap - 1.0).max(1.0);
+    let painter = ui.painter();
+    painter.rect_stroke(group.rect.expand(band), r + band, Stroke::new(band, tokens.app_bg), StrokeKind::Inside);
+    painter.rect_stroke(group.rect, r, Stroke::new(1.0, crate::theme::panel_edge(tokens.kind)), StrokeKind::Inside);
 }
 
 fn paint_widget_focus(painter: &egui::Painter, response: &egui::Response, tokens: &Tokens) {

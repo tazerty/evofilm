@@ -25,6 +25,19 @@ pub enum Which {
     Program,
 }
 
+/// A monitor with nothing to show. Evora fork (EVORA-COR-50, exception E2-L5-GEO): in Evora's
+/// shell, the dark screen a picture plays on (the monitors' neutral, in every theme) with the
+/// message on it; upstream, the placeholder text on the panel.
+fn empty(ui: &mut egui::Ui, rect: Rect, t: &Tokens, text: &str) {
+    if !crate::theme::evora_enabled() {
+        crate::dock::placeholder(ui, rect, t, text);
+        return;
+    }
+    let screen = rect.shrink(6.0);
+    ui.painter().rect_filled(screen, t.radius_sm, t.monitor_bg);
+    ui.painter().text(screen.center(), Align2::CENTER_CENTER, text, Tokens::ui(13.0), crate::theme::MONITOR_LABEL);
+}
+
 pub fn show(app: &mut FilmcraftApp, ui: &mut egui::Ui, rect: Rect, which: Which) {
     let t = app.tokens;
     let ctx = ui.ctx().clone();
@@ -38,12 +51,12 @@ pub fn show(app: &mut FilmcraftApp, ui: &mut egui::Ui, rect: Rect, which: Which)
     let (target, frame_size, rate, time, duration, drop_frame, mark_in, mark_out, name) = match which {
         Which::Program => {
             let Some(seq_id) = app.session.state.active_sequence else {
-                crate::dock::placeholder(ui, rect, &t, tl!("(no sequences)"));
+                empty(ui, rect, &t, tl!("(no sequences)"));
                 return;
             };
             // A damaged project can name an active sequence that no longer exists.
             let Some(q) = app.session.active_sequence() else {
-                crate::dock::placeholder(ui, rect, &t, tl!("(no sequences)"));
+                empty(ui, rect, &t, tl!("(no sequences)"));
                 return;
             };
             (
@@ -60,7 +73,7 @@ pub fn show(app: &mut FilmcraftApp, ui: &mut egui::Ui, rect: Rect, which: Which)
         }
         Which::Source => {
             let Some(item) = app.session.state.source_item else {
-                crate::dock::placeholder(ui, rect, &t, tl!("(no clips)"));
+                empty(ui, rect, &t, tl!("(no clips)"));
                 return;
             };
             let Some(pi) = app.session.project.item(item) else { return };

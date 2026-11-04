@@ -238,6 +238,8 @@ impl FilmcraftApp {
             }
         }
         for group in &groups {
+            // Evora fork (EVORA-COR-50): rounded corners and edge first, the focus over them
+            dock::paint_group_frame(ui, group, &t);
             dock::paint_group_focus(ui, group, self.ui.focused, &t);
         }
         let floating_order = self.floating_order(&ctx);
@@ -320,7 +322,10 @@ impl FilmcraftApp {
             if let Some(active) = group.panels.get(group.active).copied() {
                 self.panel_body(ui, active, group.content);
             }
-            ui.painter().rect_stroke(rect, t.radius, Stroke::new(1.0, t.focus), StrokeKind::Outside);
+            // Evora fork (EVORA-COR-50): a floating panel's outline is its edge's hairline in Evora's
+            // shell (its focus is painted below, as for a docked panel)
+            let outline = if crate::theme::evora_enabled() { crate::theme::panel_edge(t.kind) } else { t.focus };
+            ui.painter().rect_stroke(rect, t.radius, Stroke::new(1.0, outline), StrokeKind::Outside);
             let grip = Rect::from_min_max(rect.max - vec2(14.0, 14.0), rect.max);
             let response = ui.interact(grip, id.with("resize"), Sense::click_and_drag());
             response.widget_info(|| egui::WidgetInfo::labeled(egui::WidgetType::Button, response.enabled(), tl!("Resize floating panel")));

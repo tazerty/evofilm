@@ -13,8 +13,16 @@ use crate::theme::Tokens;
 pub fn show(app: &mut FilmcraftApp, ui: &mut egui::Ui, rect: Rect) {
     let t = app.tokens;
     let p = ui.painter().clone();
+    // Evora fork (EVORA-COR-50, exception E2-L5-GEO): in Evora's shell the header meets the shell's
+    // bar without a seam (no black rule: the panels' gutter separates it from them), Import / Edit /
+    // Export are a segmented control, hovers take the controls' radius, the workspace name is not
+    // shouted in capitals. Upstream's header is unchanged.
+    let ev = crate::theme::evora_enabled();
+    let hover_r = if ev { t.radius_sm } else { 4.0 };
     p.rect_filled(rect, 0.0, t.header_bg);
-    p.line_segment([rect.left_bottom(), rect.right_bottom()], Stroke::new(1.0, Color32::BLACK));
+    if !ev {
+        p.line_segment([rect.left_bottom(), rect.right_bottom()], Stroke::new(1.0, Color32::BLACK));
+    }
     let drag = ui.interact(rect, egui::Id::new("header-drag"), Sense::click_and_drag());
     if drag.drag_started() {
         ui.ctx().send_viewport_cmd(egui::ViewportCommand::StartDrag);
@@ -29,15 +37,46 @@ pub fn show(app: &mut FilmcraftApp, ui: &mut egui::Ui, rect: Rect) {
     let hresp = ui.interact(home, egui::Id::new("hdr-home"), Sense::click()).on_hover_text(tl!("Home"));
     app.auto.add("header.home", home, "Home");
     if hresp.hovered() {
-        p.rect_filled(home, 4.0, t.hover);
+        p.rect_filled(home, hover_r, t.hover);
     }
     icons::paint(&p, home.shrink(5.0), Icon::Home, if hresp.hovered() { t.text } else { t.text_dim });
     if hresp.clicked() {
         app.ui.mode = Mode::Import;
     }
     x = home.max.x + 16.0;
+    let modes = [(Mode::Import, "Import", tl!("Import")), (Mode::Edit, "Edit", tl!("Edit")), (Mode::Export, "Export", tl!("Export"))];
+    if ev {
+        // Evora: a segmented control, the current mode in Inter Medium on the selected segment
+        let font = |active: bool| if active { Tokens::medium(13.0) } else { Tokens::ui(13.0) };
+        let (track, thumb, thumb_edge) = crate::theme::segmented(t.kind);
+        let widths: Vec<f32> = modes.iter().map(|(m, _, shown)| p.layout_no_wrap(shown.to_string(), font(app.ui.mode == *m), t.tab_text).size().x + 24.0).collect();
+        let inner = widths.iter().sum::<f32>() + 2.0 * (widths.len() as f32 - 1.0);
+        let cy = rect.center().y;
+        let track_rect = Rect::from_min_max(pos2(x - 3.0, cy - 14.0), pos2(x + inner + 3.0, cy + 14.0));
+        p.rect_filled(track_rect, t.radius_sm + 3.0, track);
+        let mut sx = x;
+        for (i, (m, label, shown)) in modes.into_iter().enumerate() {
+            let active = app.ui.mode == m;
+            let w = widths.get(i).copied().unwrap_or(0.0);
+            let segment = Rect::from_min_size(pos2(sx, cy - 11.0), vec2(w, 22.0));
+            let resp = ui.interact(segment, egui::Id::new(("mode", label)), Sense::click());
+            app.auto.add(&format!("header.mode.{}", label.to_ascii_lowercase()), segment, label);
+            if active {
+                p.rect_filled(segment, t.radius_sm, thumb);
+                p.rect_stroke(segment, t.radius_sm, Stroke::new(1.0, thumb_edge), egui::StrokeKind::Inside);
+            }
+            let col = if active || resp.hovered() { t.tab_text_active } else { t.tab_text };
+            let galley = p.layout_no_wrap(shown.to_string(), font(active), col);
+            p.galley_with_override_text_color(pos2(segment.center().x - galley.size().x / 2.0, cy - galley.size().y / 2.0), galley, col);
+            if resp.clicked() {
+                app.ui.mode = m;
+            }
+            sx += w + 2.0;
+        }
+        x = track_rect.max.x + 18.0;
+    }
     // Mode tabs (14 pt; active = primary text with a 2 pt underline under the label)
-    for (m, label, shown) in [(Mode::Import, "Import", tl!("Import")), (Mode::Edit, "Edit", tl!("Edit")), (Mode::Export, "Export", tl!("Export"))] {
+    for (m, label, shown) in modes.into_iter().filter(|_| !ev) {
         let active = app.ui.mode == m;
         let galley = p.layout_no_wrap(shown.to_string(), Tokens::ui(14.0), if active { t.tab_text_active } else { t.tab_text });
         let r = Rect::from_min_size(pos2(x - 6.0, rect.min.y + 6.0), vec2(galley.size().x + 12.0, rect.height() - 12.0));
@@ -75,7 +114,7 @@ pub fn show(app: &mut FilmcraftApp, ui: &mut egui::Ui, rect: Rect) {
         let resp = ui.interact(r, egui::Id::new(("hdr", id)), Sense::click()).on_hover_text(tip);
         app.auto.add(&format!("header.{id}"), r, tip);
         if resp.hovered() {
-            ui.painter().rect_filled(r, 4.0, t.hover);
+            ui.painter().rect_filled(r, hover_r, t.hover);
         }
         icons::paint(ui.painter(), r.shrink(6.0), icon, if resp.hovered() { t.text } else { t.text_dim });
         resp
@@ -113,9 +152,9 @@ pub fn show(app: &mut FilmcraftApp, ui: &mut egui::Ui, rect: Rect) {
         crate::panels::settings::cycle_appearance(app, ui.ctx());
     }
     let ws_resp = btn(ui, Icon::Workspaces, "workspaces", tl!("Workspaces"), app);
-    // workspace name (caps)
-    let ws = crate::i18n::t(&app.ui.workspace).to_uppercase();
-    let wg = p.layout_no_wrap(ws.clone(), Tokens::ui(11.0), t.text_dim);
+    // workspace name (caps; Evora: as written, a size up)
+    let ws = if ev { crate::i18n::t(&app.ui.workspace).to_string() } else { crate::i18n::t(&app.ui.workspace).to_uppercase() };
+    let wg = p.layout_no_wrap(ws.clone(), Tokens::ui(if ev { 12.0 } else { 11.0 }), t.text_dim);
     let wr = Rect::from_min_size(pos2(rx - wg.size().x + 10.0, rect.center().y - 10.0), vec2(wg.size().x + 8.0, 20.0));
     let wresp = ui.interact(wr, egui::Id::new("hdr-ws-name"), Sense::click());
     app.auto.add("header.workspaceName", wr, &ws);
