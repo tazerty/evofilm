@@ -269,6 +269,12 @@ fn report_theme(t: &Tokens, contrast: bool) {
             "track": css(t.tl_track_bg),
             "trackAlt": css(t.tl_track_bg_alt),
             "trackTarget": css(t.track_target),
+            // geometry (EVORA-COR-50): rounded panels on the backdrop, gutters, tab strip
+            "backdrop": css(t.app_bg),
+            "radius": t.radius,
+            "radiusSm": t.radius_sm,
+            "gap": t.gap,
+            "tabH": t.tab_h,
         }),
     );
 }

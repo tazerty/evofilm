@@ -10,6 +10,10 @@
 //!   indigo ones; a colour outside them is mixed towards white or black. Each of them then has a
 //!   contrast floor ([`FOCUS_MIN`], [`TEXT_MIN`]) on the surfaces it is drawn on, raised if needed.
 //! - **Accessible contrast**: brighter secondary text and borders, as Settings ▸ Appearance does.
+//! - **Geometry** (patch EVORA-COR-50): the panels are rounded cards floating on the backdrop, with
+//!   even gutters ([`RADIUS`], [`GAP`]); tabs and modes are segmented controls ([`segmented`]); a
+//!   hairline ([`panel_edge`]) draws each panel's edge; an empty monitor is a dark screen
+//!   ([`MONITOR_LABEL`] on [`MONITOR`]).
 //!
 //! Off unless the host turns it on ([`set_evora`]), per thread: the upstream themes and their tests
 //! are unchanged.
@@ -64,6 +68,36 @@ const Z900: Color32 = rgb(0x18181b);
 const Z950: Color32 = rgb(0x09090b);
 /// The monitors' surround, the same neutral in every theme.
 pub const MONITOR: Color32 = rgb(0x0d0d0d);
+/// Text drawn on an empty monitor (the monitor is dark in every theme).
+pub const MONITOR_LABEL: Color32 = Z400;
+
+/// Corner radius of a panel (a rounded card on the backdrop).
+pub const RADIUS: f32 = 10.0;
+/// Corner radius of controls: buttons, fields, segments, menus' rows.
+pub const RADIUS_SM: f32 = 6.0;
+/// Gutter between panels, and between the panels and the window's edges.
+pub const GAP: f32 = 6.0;
+/// Height of a panel's tab strip.
+pub const TAB_H: f32 = 34.0;
+
+/// Track, selected segment and the selected segment's edge of Evora's segmented controls (a
+/// panel's tabs, the header's Import / Edit / Export) in theme `kind`.
+pub fn segmented(kind: ThemeKind) -> (Color32, Color32, Color32) {
+    match kind {
+        ThemeKind::Dark => (Z800, Z600, Z600),
+        ThemeKind::Medium => (Z900, Z600, Z600),
+        ThemeKind::Light => (Z200, Color32::WHITE, Z300),
+    }
+}
+
+/// The hairline drawn along a panel's edge in theme `kind`.
+pub fn panel_edge(kind: ThemeKind) -> Color32 {
+    match kind {
+        ThemeKind::Dark => Z800,
+        ThemeKind::Medium => Z700,
+        ThemeKind::Light => Z300,
+    }
+}
 
 /// The chrome of theme `t.kind` in Evora's greys; the other tokens (audio controls, plots, render
 /// and caption colours, danger) stay the theme's.
@@ -101,6 +135,10 @@ pub(super) fn chrome(t: Tokens) -> Tokens {
             in_out_shade: Z700,
             clip_selected_border: Z50,
             monitor_bg: MONITOR,
+            radius: RADIUS,
+            radius_sm: RADIUS_SM,
+            gap: GAP,
+            tab_h: TAB_H,
             ..t
         },
         ThemeKind::Medium => Tokens {
@@ -135,40 +173,48 @@ pub(super) fn chrome(t: Tokens) -> Tokens {
             in_out_shade: Z600,
             clip_selected_border: Z50,
             monitor_bg: MONITOR,
+            radius: RADIUS,
+            radius_sm: RADIUS_SM,
+            gap: GAP,
+            tab_h: TAB_H,
             ..t
         },
         ThemeKind::Light => Tokens {
-            app_bg: Z300,
-            header_bg: Z50,
-            panel_bg: Z100,
-            tab_bg: Z100,
+            app_bg: Z200,
+            header_bg: Color32::WHITE,
+            panel_bg: Color32::WHITE,
+            tab_bg: Color32::WHITE,
             tab_text: Z600,
             tab_text_active: Z900,
             text: Z900,
             text_dim: Z600,
             text_faint: Z500,
-            icon: Z700,
+            icon: Z600,
             icon_active: Z900,
-            hover: Z200,
-            pressed: Z300,
-            field_bg: Color32::WHITE,
+            hover: Z100,
+            pressed: Z200,
+            field_bg: Z50,
             field_border: Z400,
             separator: Z200,
-            row_alt: rgb(0xececee),
-            row_selected: Z300,
-            pill_active_bg: Z300,
-            button_hover: Z200,
+            row_alt: rgb(0xf7f7f8),
+            row_selected: Z200,
+            pill_active_bg: Z200,
+            button_hover: Z100,
             button_border: Z300,
-            tl_bg: Z200,
-            tl_track_bg: Z100,
+            tl_bg: Z100,
+            tl_track_bg: Color32::WHITE,
             tl_track_bg_alt: Z50,
-            tl_header_bg: Z100,
-            tl_ruler_bg: Z50,
+            tl_header_bg: Z50,
+            tl_ruler_bg: Color32::WHITE,
             tl_ruler_tick: Z400,
             tl_ruler_text: Z600,
-            in_out_shade: Z300,
+            in_out_shade: Z200,
             clip_selected_border: Z900,
             monitor_bg: MONITOR,
+            radius: RADIUS,
+            radius_sm: RADIUS_SM,
+            gap: GAP,
+            tab_h: TAB_H,
             ..t
         },
     }
@@ -179,24 +225,26 @@ pub(super) fn chrome(t: Tokens) -> Tokens {
 pub(super) fn with_appearance(mut t: Tokens, highlight: Option<[u8; 3]>, accessible_contrast: bool) -> Tokens {
     if accessible_contrast {
         match t.kind {
+            // inactive tabs keep a secondary colour (EVORA-COR-50): the selected segment marks the
+            // shown tab, and secondary text already meets 4.5:1 on the tab strip
             ThemeKind::Dark => {
                 t.text_dim = Z300;
                 t.text_faint = Z400;
-                t.tab_text = t.tab_text_active;
+                t.tab_text = Z400;
                 t.field_border = Z500;
                 t.separator = Z700;
             }
             ThemeKind::Medium => {
                 t.text_dim = Z300;
                 t.text_faint = Z400;
-                t.tab_text = t.tab_text_active;
+                t.tab_text = Z400;
                 t.field_border = Z400;
                 t.separator = Z600;
             }
             ThemeKind::Light => {
                 t.text_dim = Z700;
                 t.text_faint = Z600;
-                t.tab_text = Z800;
+                t.tab_text = Z600;
                 t.field_border = Z500;
                 t.separator = Z300;
             }
@@ -396,6 +444,38 @@ mod tests {
         }
         let light = Tokens::for_kind(ThemeKind::Light).with_appearance(None, true);
         assert!(luminance(light.panel_bg) > luminance(dark.panel_bg));
+    }
+
+    #[test]
+    fn evoras_panels_are_rounded_cards_and_upstreams_are_not() {
+        set_evora(false);
+        let up = Tokens::for_kind(ThemeKind::Dark);
+        assert_eq!((up.radius, up.radius_sm, up.gap, up.tab_h), (0.0, 4.0, 4.0, 32.0), "upstream geometry unchanged");
+        let _on = On::new();
+        for kind in KINDS {
+            let t = Tokens::for_kind(kind).with_appearance(None, true);
+            assert_eq!((t.radius, t.radius_sm, t.gap, t.tab_h), (RADIUS, RADIUS_SM, GAP, TAB_H), "{kind:?}");
+            assert_ne!(t.app_bg, t.panel_bg, "{kind:?}: the panels stand out from the backdrop");
+            assert_ne!(panel_edge(kind), t.panel_bg, "{kind:?}: the edge is drawn");
+        }
+        // the band of backdrop that trims the bodies' square corners (dock::paint_group_frame) is
+        // half the radius: it reaches past the arc (r·(√2−1)) and stays inside the gutter
+        assert!(RADIUS * 0.5 >= RADIUS * (std::f32::consts::SQRT_2 - 1.0));
+        assert!(RADIUS * 0.5 < GAP);
+    }
+
+    #[test]
+    fn segmented_controls_and_the_empty_monitor_keep_their_contrasts() {
+        let _on = On::new();
+        for kind in KINDS {
+            let t = Tokens::for_kind(kind).with_appearance(None, true);
+            let (track, thumb, _) = segmented(kind);
+            assert!(contrast(t.tab_text_active, thumb) >= TEXT_MIN, "{kind:?}: shown tab on its segment");
+            assert!(contrast(t.tab_text, track) >= TEXT_MIN, "{kind:?}: other tabs on the track");
+            assert!(contrast(t.tab_text, t.tab_bg) >= TEXT_MIN, "{kind:?}: other tabs on the strip");
+            assert_ne!(t.tab_text, t.tab_text_active, "{kind:?}: the other tabs read as secondary");
+        }
+        assert!(contrast(MONITOR_LABEL, MONITOR) >= TEXT_MIN);
     }
 
     #[test]

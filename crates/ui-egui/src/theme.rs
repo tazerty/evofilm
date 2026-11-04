@@ -11,7 +11,9 @@ use serde::{Deserialize, Serialize};
 // Evora fork (patch COR-FK-B2, exception E2-L5): Evora's palette for Corte inside Evora's shell,
 // turned on by the host; the themes below are unchanged while it is off.
 mod evora;
-pub use evora::{EVORA_ACCENT, FOCUS_MIN, MONITOR, TEXT_MIN, contrast, evora_enabled, in_palette, luminance, set_evora};
+pub use evora::{
+    EVORA_ACCENT, FOCUS_MIN, MONITOR, MONITOR_LABEL, TEXT_MIN, contrast, evora_enabled, in_palette, luminance, panel_edge, segmented, set_evora,
+};
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ThemeKind {
@@ -396,6 +398,11 @@ impl Tokens {
     pub fn semibold(size: f32) -> FontId {
         FontId::new(size, FontFamily::Name("semibold".into()))
     }
+    /// Inter Medium (the "medium" family [`install`] sets up): Evora fork, EVORA-COR-50, the shown
+    /// tab and mode.
+    pub fn medium(size: f32) -> FontId {
+        FontId::new(size, FontFamily::Name("medium".into()))
+    }
     /// The big blue timecode over the timeline and under the monitors: regular weight, as in
     /// Premiere (Premiere's reads 10 px tall and 76 px wide for 00:00:16:05 at 1x).
     pub fn timecode() -> FontId {
@@ -487,6 +494,13 @@ pub fn apply_visuals(ctx: &egui::Context, t: &Tokens) {
     v.menu_corner_radius = egui::CornerRadius::same(6);
     v.popup_shadow = egui::epaint::Shadow { offset: [0, 4], blur: 16, spread: 0, color: Color32::from_black_alpha(140) };
     v.window_shadow = v.popup_shadow;
+    // Evora fork (EVORA-COR-50, exception E2-L5): rounder menus and windows, a softer and wider shadow
+    if evora::evora_enabled() {
+        v.window_corner_radius = egui::CornerRadius::same(12);
+        v.menu_corner_radius = egui::CornerRadius::same(10);
+        v.popup_shadow = egui::epaint::Shadow { offset: [0, 8], blur: 28, spread: 0, color: Color32::from_black_alpha(if light { 46 } else { 120 }) };
+        v.window_shadow = v.popup_shadow;
+    }
     for w in [&mut v.widgets.noninteractive, &mut v.widgets.inactive, &mut v.widgets.hovered, &mut v.widgets.active, &mut v.widgets.open] {
         w.corner_radius = egui::CornerRadius::same(t.radius_sm as u8);
     }
