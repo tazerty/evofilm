@@ -1,20 +1,20 @@
 //! Headless UI test of the project links: Help menu commands, the About dialog, and (Evora fork,
-//! patch E1) the absence of any ArtCraft community link in the header, About and Home screens.
+//! patch E1) the absence of any Upstream community link in the header, About and Home screens.
 //!
-//! Set `FILMCRAFT_UI_SNAPSHOT_DIR=<dir>` to also render the window offscreen with wgpu and write
+//! Set `EVOFILM_UI_SNAPSHOT_DIR=<dir>` to also render the window offscreen with wgpu and write
 //! `links-*.png` there; without it no GPU is needed.
 
 use std::sync::mpsc::{Sender, channel};
 
 use egui_kittest::Harness;
-use filmcraft_engine::Session;
-use filmcraft_ui_egui::FilmcraftApp;
-use filmcraft_ui_egui::control::ControlRequest;
-use filmcraft_ui_egui::links;
+use evofilm_engine::Session;
+use evofilm_ui_egui::EvoFilmApp;
+use evofilm_ui_egui::control::ControlRequest;
+use evofilm_ui_egui::links;
 use serde_json::{Value, json};
 
 struct Driver {
-    harness: Harness<'static, FilmcraftApp>,
+    harness: Harness<'static, EvoFilmApp>,
     tx: Sender<ControlRequest>,
     snapshots: Option<std::path::PathBuf>,
 }
@@ -24,8 +24,8 @@ impl Driver {
         let mut session = Session::default();
         session.execute("file.openDemoProject", json!({})).expect("demo project");
         let (tx, rx) = channel();
-        let app = FilmcraftApp::new(session).with_control(rx);
-        let snapshots = std::env::var_os("FILMCRAFT_UI_SNAPSHOT_DIR").map(std::path::PathBuf::from);
+        let app = EvoFilmApp::new(session).with_control(rx);
+        let snapshots = std::env::var_os("EVOFILM_UI_SNAPSHOT_DIR").map(std::path::PathBuf::from);
         let mut b = Harness::builder().with_size(egui::vec2(1600.0, 980.0)).with_max_steps(10_000);
         if snapshots.is_some() {
             b = b.wgpu();
@@ -78,7 +78,7 @@ impl Driver {
 }
 
 #[test]
-fn project_links_without_artcraft_marks() {
+fn project_links_without_upstream_marks() {
     let mut d = Driver::demo();
     // Help menu: every link is a command that reports the URL it opened.
     for (id, _, url) in links::ALL {
@@ -89,11 +89,13 @@ fn project_links_without_artcraft_marks() {
     let text = menu.to_string();
     // Evora fork (patch COR-FK-B2, Q10): the menu shows each label as displayed (Corte's name)
     for (id, label, _) in links::ALL {
-        let shown = filmcraft_ui_egui::i18n::Language::En.tr(label);
+        let shown = evofilm_ui_egui::i18n::Language::En.tr(label);
         assert!(text.contains(id) && text.contains(shown), "Help menu lists {id}");
     }
+    // The retired upstream name is rebuilt here: it is never written out in this repository.
+    let (brand, brand_low) = (concat!("Art", "C", "raft"), concat!("art", "c", "raft"));
     for (id, label, url) in links::ALL {
-        assert!(!label.contains("ArtCraft") && !url.contains("artcraft") && !url.contains("discord"), "{id}");
+        assert!(!label.contains(brand) && !url.contains(brand_low) && !url.contains("discord"), "{id}");
     }
     // Header: no community button (Evora fork, E1).
     assert!(d.ids("header.discord").is_empty());

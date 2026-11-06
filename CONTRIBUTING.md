@@ -1,4 +1,4 @@
-# Contributing to FilmCraft
+# Contributing to EvoFilm
 
 Thanks for helping. Before you start:
 

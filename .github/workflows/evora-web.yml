@@ -1,11 +1,12 @@
-# Evora : build web (WASM) de filmcraft, moteur d'Evora Corte, et portes de qualité.
+# Evora : build web (WASM) d'evofilm, moteur d'Evora Corte, et portes de qualité.
 #
-# Workflow écrit par Evora. Rien n'est copié de storytold/craft-common-actions (non épinglé, sans
+# Workflow écrit par Evora. Rien n'est copié des actions communes de l'amont (non épinglées, sans
 # licence). La construction reprend packaging/web/package.sh et `cargo xtask web` (MIT OR
 # Apache-2.0). Actions GitHub seules, épinglées par SHA ; outils installés à version exacte
 # (`cargo install --locked`) et vérifiés ; aucun secret.
 #
-# Portes bloquantes (apps/creative/ARCHITECTURE.md §3.4) : marques ArtCraft dans le bundle, fichiers
+# Portes bloquantes (apps/creative/ARCHITECTURE.md §3.4) : marques du nom amont retiré dans le bundle,
+# porte zéro terme (le nom retiré absent du site livré, binaires compris, hors LICENSES/), fichiers
 # d'hébergement dans l'archive, cargo-deny (licences, avis de sécurité, sources), cargo-about
 # (LICENSES/ agrégé), test de fumée Chrome sans interface depuis une autre origine. Portes de
 # catalogue : émojis (E10) et termes sensibles (E9), en mesure tant que leur patch n'est pas posé
@@ -194,13 +195,13 @@ jobs:
         shell: bash
         run: |
           rc=0
-          cargo deny --manifest-path apps/filmcraft-web/Cargo.toml --config .github/evora/deny.toml --locked --color never \
+          cargo deny --manifest-path apps/evofilm-web/Cargo.toml --config .github/evora/deny.toml --locked --color never \
             check advisories licenses sources > "$RUNNER_TEMP/deny.log" 2>&1 || rc=$?
           cat "$RUNNER_TEMP/deny.log"
           {
             echo "### Porte cargo-deny (bloquante)"
             echo
-            echo "Graphe : crate \`filmcraft-web\`, cible \`wasm32-unknown-unknown\`, sans dépendances de dev. $(cargo deny --version)."
+            echo "Graphe : crate \`evofilm-web\`, cible \`wasm32-unknown-unknown\`, sans dépendances de dev. $(cargo deny --version)."
             echo
             echo '```'
             { grep -E '(advisories|licenses|sources) (ok|FAILED)|^(warning|error)\[' "$RUNNER_TEMP/deny.log" || true; } | sort | uniq -c | sort -rn | head -40
@@ -213,7 +214,7 @@ jobs:
       - name: Porte E7 (graphe livré sans client réseau ni moteur d'inférence)
         shell: bash
         run: |
-          cargo tree --locked -p filmcraft-web --target wasm32-unknown-unknown -e normal --prefix none --format '{p}' \
+          cargo tree --locked -p evofilm-web --target wasm32-unknown-unknown -e normal --prefix none --format '{p}' \
             | awk '{ print $1 }' | sort -u > "$RUNNER_TEMP/web-crates.txt"
           n="$(wc -l < "$RUNNER_TEMP/web-crates.txt")"
           bad="$(grep -E -x 'ureq|reqwest|hyper|hyper-util|h2|rustls|rustls-rustcrypto|native-tls|openssl|candle-core|candle-nn|candle-transformers' "$RUNNER_TEMP/web-crates.txt" | tr '\n' ' ' || true)"
@@ -221,7 +222,7 @@ jobs:
           {
             echo "### Porte E7 : graphe livré sans client réseau ni moteur d'inférence (bloquante)"
             echo
-            echo "$n crates dans le graphe de \`filmcraft-web\` (wasm32, dépendances normales). Interdites (client HTTP ou TLS, inférence Whisper/Kokoro : features whisper, speech-download, neural-voices) : ${bad:-aucune}."
+            echo "$n crates dans le graphe de \`evofilm-web\` (wasm32, dépendances normales). Interdites (client HTTP ou TLS, inférence Whisper/Kokoro : features whisper, speech-download, neural-voices) : ${bad:-aucune}."
           } >> "$GITHUB_STEP_SUMMARY"
           if [ "$n" -lt 50 ]; then
             echo "::error::graphe web anormalement petit ($n crates) : la porte ne mesure rien"
@@ -237,7 +238,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p "$RUNNER_TEMP/licences"
-          cargo about generate --manifest-path apps/filmcraft-web/Cargo.toml --config .github/evora/about.toml \
+          cargo about generate --manifest-path apps/evofilm-web/Cargo.toml --config .github/evora/about.toml \
             --locked --fail --output-file "$RUNNER_TEMP/licences/THIRD-PARTY-LICENSES.html" .github/evora/about.hbs
           n="$(grep -c '<h3 id=' "$RUNNER_TEMP/licences/THIRD-PARTY-LICENSES.html" || true)"
           c="$(grep -c '<li>' "$RUNNER_TEMP/licences/THIRD-PARTY-LICENSES.html" || true)"
@@ -260,7 +261,7 @@ jobs:
           if command -v wasm-opt >/dev/null; then
             echo "::warning::wasm-opt présent sur le runner ($(wasm-opt --version)), appliqué par xtask"
           fi
-          unset CRAFT_FONTS_DIR CRAFT_FONTS_REQUIRED
+          unset EVO_FONTS_DIR EVO_FONTS_REQUIRED
           command -v wasm-bindgen
           cargo xtask web
 
@@ -304,6 +305,19 @@ jobs:
         if: ${{ !cancelled() && steps.stage.outcome == 'success' }}
         shell: bash
         run: python3 -I .github/evora/gates.py marks "${{ steps.stage.outputs.stage }}"
+
+      - name: Porte zéro terme (nom amont retiré absent du site, hors LICENSES/)
+        if: ${{ !cancelled() && steps.stage.outcome == 'success' }}
+        shell: bash
+        env:
+          NAME: ${{ steps.meta.outputs.name }}
+        run: |
+          # Sur l'archive elle-même, extraite : c'est ce qui sera livré. L'autotest prouve que la porte sait rougir.
+          x="$RUNNER_TEMP/extract-terme"
+          mkdir -p "$x"
+          unzip -q "dist/evora/$NAME.zip" -d "$x"
+          python3 -I .github/evora/zero-terme.py selftest
+          python3 -I .github/evora/zero-terme.py check "$x/$NAME"
 
       - name: Porte hébergement (archive)
         if: ${{ !cancelled() && steps.stage.outcome == 'success' }}
@@ -415,16 +429,16 @@ jobs:
         shell: bash
         run: |
           # Exclu : test amont qui exige une police japonaise installée sur le système (Noto Sans
-          # CJK JP) ou craft-fonts ; sans rapport avec les patchs Evora. À réactiver avec E6.
+          # CJK JP) ou evo-fonts ; sans rapport avec les patchs Evora. À réactiver avec E6.
           # COR-FK-B2 : theme::evora:: (palette d'Evora, contrastes sur les 360 palettes D-38).
-          cargo test --locked -p filmcraft-ui-egui --lib -- 'i18n::' 'links::' 'theme::evora::' \
+          cargo test --locked -p evofilm-ui-egui --lib -- 'i18n::' 'links::' 'theme::evora::' \
             --skip 'i18n::tests::language_commands_switch_and_persist_without_a_document'
 
       - name: Liens à l'écran (test d'interface sans GPU)
         shell: bash
         # Depuis la v0.13.0, les tests d'interface d'ui-egui forment un seul binaire (`tests/it/`) :
         # seul le module links_ui y est joué.
-        run: "cargo test --locked -p filmcraft-ui-egui --test it -- links_ui::"
+        run: "cargo test --locked -p evofilm-ui-egui --test it -- links_ui::"
 
   publish:
     name: Publication (artefact au nom Evora, portes et tests verts)

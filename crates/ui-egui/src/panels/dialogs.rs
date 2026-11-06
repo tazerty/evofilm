@@ -1,9 +1,9 @@
 //! Modal dialogs (About; Keyboard Shortcuts in `shortcuts_dialog`; Settings in `settings`;
 //! Recovery/Revert in `file_dialogs`).
 
-use crate::{Dialog, FilmcraftApp};
+use crate::{Dialog, EvoFilmApp};
 
-pub fn show(app: &mut FilmcraftApp, ctx: &egui::Context) {
+pub fn show(app: &mut EvoFilmApp, ctx: &egui::Context) {
     crate::panels::media_dialogs::show(app, ctx);
     crate::panels::color_dialogs::show(app, ctx);
     crate::panels::clip_dialogs::show(app, ctx);
@@ -34,8 +34,8 @@ pub fn show(app: &mut FilmcraftApp, ctx: &egui::Context) {
     let mut open = true;
     match d {
         Dialog::About => {
-            egui::Window::new(tl!("About FilmCraft"))
-                .id(egui::Id::new("About FilmCraft"))
+            egui::Window::new(tl!("About EvoFilm"))
+                .id(egui::Id::new("About EvoFilm"))
                 .open(&mut open)
                 .collapsible(false)
                 .resizable(false)
@@ -94,7 +94,7 @@ pub fn show(app: &mut FilmcraftApp, ctx: &egui::Context) {
 ///
 /// Automation ids: `audioGain.<set|adjust|normalizeMax|normalizeAll>` (radio buttons),
 /// `audioGain.<mode>.value` (dB fields), `audioGain.peak`, `audioGain.ok`, `audioGain.cancel`.
-fn audio_gain(app: &mut FilmcraftApp, ctx: &egui::Context) -> bool {
+fn audio_gain(app: &mut EvoFilmApp, ctx: &egui::Context) -> bool {
     let peak_id = egui::Id::new("audio-gain-peak");
     let rev = app.session.revision;
     let cached: Option<(u64, Option<f64>)> = ctx.data(|d| d.get_temp(peak_id));
@@ -188,9 +188,9 @@ fn audio_gain(app: &mut FilmcraftApp, ctx: &egui::Context) -> bool {
 /// (n tracks before the new ones; 0 = Before First Track); `addTracks.<audio|submix>.type` and
 /// `addTracks.<audio|submix>.type.option.<standard|stereo|5.1|adaptive|mono>`; `addTracks.ok`,
 /// `addTracks.cancel`.
-fn add_tracks(app: &mut FilmcraftApp, ctx: &egui::Context) -> bool {
+fn add_tracks(app: &mut EvoFilmApp, ctx: &egui::Context) -> bool {
     let Some(seq) = app.session.active_sequence() else { return false };
-    let names = |tracks: &[filmcraft_engine::project::Track]| tracks.iter().map(|t| t.name.clone()).collect::<Vec<_>>();
+    let names = |tracks: &[evofilm_engine::project::Track]| tracks.iter().map(|t| t.name.clone()).collect::<Vec<_>>();
     let (vnames, anames, snames) = (names(&seq.video_tracks), names(&seq.audio_tracks), names(&seq.submix_tracks));
     let mut d = app.ui.add_tracks.clone();
     crate::widgets::revert_drag_on_escape(ctx, egui::Id::new("add-tracks-before-drag"), &mut d);
@@ -320,7 +320,7 @@ fn add_tracks(app: &mut FilmcraftApp, ctx: &egui::Context) -> bool {
 /// Automation ids: `deleteTracks.video`, `deleteTracks.audio`, `deleteTracks.captions` (checkboxes),
 /// `deleteTracks.<kind>.target` (track menus), `deleteTracks.<kind>.option.<empty|V1|A2|C1…>`
 /// (menu entries while open), `deleteTracks.ok`, `deleteTracks.cancel`.
-fn delete_tracks(app: &mut FilmcraftApp, ctx: &egui::Context) -> bool {
+fn delete_tracks(app: &mut EvoFilmApp, ctx: &egui::Context) -> bool {
     let Some(seq) = app.session.active_sequence() else { return false };
     let names = |n: usize, p: &str| (1..=n).map(|i| format!("{p}{i}")).collect::<Vec<_>>();
     let vnames = names(seq.video_tracks.len(), "V");
@@ -410,13 +410,13 @@ fn delete_tracks(app: &mut FilmcraftApp, ctx: &egui::Context) -> bool {
     keep
 }
 
-/// Help ▸ About FilmCraft, in three tabs: About (version, licence and the source links),
+/// Help ▸ About EvoFilm, in three tabs: About (version, licence and the source links),
 /// Contributors and Models (the credits compiled in from `contributors/contributors.json`, see
 /// `crate::credits` and docs/contributors.md).
 ///
 /// Automation ids: `about.tab.about`, `about.tab.contributors`, `about.tab.models`; the About tab's
 /// links and the credits controls are listed on [`about_tab`] and [`crate::credits::contributors_ui`].
-fn about(app: &mut FilmcraftApp, ui: &mut egui::Ui) {
+fn about(app: &mut EvoFilmApp, ui: &mut egui::Ui) {
     let tab_id = egui::Id::new("about_tab");
     let mut tab = ui.data_mut(|d| d.get_temp::<u8>(tab_id)).unwrap_or(0);
     ui.horizontal(|ui| {
@@ -445,19 +445,19 @@ fn about(app: &mut FilmcraftApp, ui: &mut egui::Ui) {
     }
 }
 
-/// About ▸ About: version, licence and the source links. Evora fork (patch E1): no ArtCraft
+/// About ▸ About: version, licence and the source links. Evora fork (patch E1): no Upstream
 /// wordmark, community link or mention (docs/brand/LICENSE-brand.txt, "Forks and modified
 /// versions").
 ///
 /// Automation ids: `about.github`, `about.reportIssue`.
-fn about_tab(app: &mut FilmcraftApp, ui: &mut egui::Ui) {
+fn about_tab(app: &mut EvoFilmApp, ui: &mut egui::Ui) {
     use crate::icons::{self, Icon};
     use crate::links;
     let t = app.tokens;
     ui.set_width(380.0);
     // Evora fork (E1-L5, patch COR-FK-B2, Q10): the heading names the app as the catalogs do, so
     // that this build shows its own name (i18n::t), not a literal the display override cannot reach
-    ui.heading(crate::i18n::t("FilmCraft"));
+    ui.heading(crate::i18n::t("EvoFilm"));
     ui.label(tlf!("Version {version}", version = env!("CARGO_PKG_VERSION")));
     ui.label(tl!("A clean-room, pure-Rust non-linear video editor."));
     ui.add_space(10.0);

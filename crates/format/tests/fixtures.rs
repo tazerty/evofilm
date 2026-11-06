@@ -1,8 +1,8 @@
 //! Old project files keep opening: hand-made fixtures of every past schema are upgraded on load.
 
-use filmcraft_format::{FormatError, SCHEMA_VERSION, decode, encode};
-use filmcraft_project::{ClipId, ItemId, ItemKind, Project};
-use filmcraft_time::Tick;
+use evofilm_format::{FormatError, SCHEMA_VERSION, decode, encode};
+use evofilm_project::{ClipId, ItemId, ItemKind, Project};
+use evofilm_time::Tick;
 
 fn fixture(name: &str) -> Vec<u8> {
     std::fs::read(std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures").join(name)).unwrap()
@@ -10,7 +10,7 @@ fn fixture(name: &str) -> Vec<u8> {
 
 #[test]
 fn v1_minimal_loads() {
-    let l = decode(&fixture("v1-minimal.fcproj")).unwrap();
+    let l = decode(&fixture("v1-minimal.evofilm")).unwrap();
     assert_eq!(l.schema_version, 1);
     assert!(l.migrated());
     assert_eq!(l.project.name, "Legacy Minimal");
@@ -21,17 +21,17 @@ fn v1_minimal_loads() {
 /// Main briefly wrote bare projects with `"version": 2` (caption tracks) before the envelope landed.
 #[test]
 fn bare_version_2_loads_as_schema_v1() {
-    let mut v: serde_json::Value = serde_json::from_slice(&fixture("v1-edit.fcproj")).unwrap();
+    let mut v: serde_json::Value = serde_json::from_slice(&fixture("v1-edit.evofilm")).unwrap();
     v["version"] = 2.into();
     let l = decode(&serde_json::to_vec(&v).unwrap()).unwrap();
     assert_eq!(l.schema_version, 1);
     assert!(l.migrated());
-    assert_eq!(l.project.name, decode(&fixture("v1-edit.fcproj")).unwrap().project.name);
+    assert_eq!(l.project.name, decode(&fixture("v1-edit.evofilm")).unwrap().project.name);
 }
 
 #[test]
 fn v1_edit_loads_with_defaults_for_later_fields() {
-    let l = decode(&fixture("v1-edit.fcproj")).unwrap();
+    let l = decode(&fixture("v1-edit.evofilm")).unwrap();
     assert_eq!(l.schema_version, 1);
     let p = &l.project;
     assert_eq!(p.name, "Legacy Edit");
@@ -55,7 +55,7 @@ fn v1_edit_loads_with_defaults_for_later_fields() {
 
 #[test]
 fn legacy_audio_field_becomes_primary_stream_and_clip_defaults_to_zero() {
-    let p = decode(&fixture("v1-edit.fcproj")).unwrap().project;
+    let p = decode(&fixture("v1-edit.evofilm")).unwrap().project;
     let media = p.item(ItemId(5)).unwrap().as_media().unwrap();
     assert_eq!(media.info.audio_streams.len(), 1);
     assert!(media.info.has_audio());
@@ -68,28 +68,28 @@ fn legacy_audio_field_becomes_primary_stream_and_clip_defaults_to_zero() {
 /// Out-of-range audio stream data is repaired on load, never a reason to refuse the project.
 #[test]
 fn hostile_audio_stream_counts_and_indices_are_repaired_not_rejected() {
-    let mut p = decode(&fixture("v1-edit.fcproj")).unwrap().project;
+    let mut p = decode(&fixture("v1-edit.evofilm")).unwrap().project;
     let seq = ItemId(21);
-    for bad in [filmcraft_media::MAX_AUDIO_STREAMS, usize::MAX] {
+    for bad in [evofilm_media::MAX_AUDIO_STREAMS, usize::MAX] {
         p.sequence_mut(seq).unwrap().audio_tracks[0].items[0].audio_stream = bad;
         let loaded = decode(&encode(&p, false)).unwrap().project;
         assert_eq!(loaded.sequence(seq).unwrap().audio_tracks[0].items[0].audio_stream, 0);
     }
-    p.sequence_mut(seq).unwrap().audio_tracks[0].items[0].audio_stream = filmcraft_media::MAX_AUDIO_STREAMS - 1;
+    p.sequence_mut(seq).unwrap().audio_tracks[0].items[0].audio_stream = evofilm_media::MAX_AUDIO_STREAMS - 1;
     let loaded = decode(&encode(&p, false)).unwrap().project;
-    assert_eq!(loaded.sequence(seq).unwrap().audio_tracks[0].items[0].audio_stream, filmcraft_media::MAX_AUDIO_STREAMS - 1, "in range: kept");
+    assert_eq!(loaded.sequence(seq).unwrap().audio_tracks[0].items[0].audio_stream, evofilm_media::MAX_AUDIO_STREAMS - 1, "in range: kept");
     let media = p.item_mut(ItemId(5)).unwrap().as_media_mut().unwrap();
     let stream = media.info.audio_streams[0].clone();
-    media.info.audio_streams.resize(filmcraft_media::MAX_AUDIO_STREAMS + 1, stream);
+    media.info.audio_streams.resize(evofilm_media::MAX_AUDIO_STREAMS + 1, stream);
     let loaded = decode(&encode(&p, false)).unwrap().project;
-    assert_eq!(loaded.item(ItemId(5)).unwrap().as_media().unwrap().info.audio_streams.len(), filmcraft_media::MAX_AUDIO_STREAMS);
+    assert_eq!(loaded.item(ItemId(5)).unwrap().as_media().unwrap().info.audio_streams.len(), evofilm_media::MAX_AUDIO_STREAMS);
 }
 
 /// Persisted media metadata is used to allocate synthetic and offline source frames, so it must
 /// have the same bounded dimensions as a sequence before the project is opened.
 #[test]
 fn hostile_media_video_dimensions_are_rejected() {
-    let mut p = decode(&fixture("v1-edit.fcproj")).unwrap().project;
+    let mut p = decode(&fixture("v1-edit.evofilm")).unwrap().project;
     let media = p.item_mut(ItemId(5)).unwrap().as_media_mut().unwrap();
     let video = media.info.video.as_mut().unwrap();
     video.width = u32::MAX;
@@ -103,7 +103,7 @@ fn hostile_media_video_dimensions_are_rejected() {
 /// on clips, no audio channel map, subclips without Restrict Trims.
 #[test]
 fn v8_subclip_loads_with_m3_10_defaults() {
-    let l = decode(&fixture("v8-subclip.fcproj")).unwrap();
+    let l = decode(&fixture("v8-subclip.evofilm")).unwrap();
     assert_eq!(l.schema_version, 8);
     assert!(l.migrated());
     let p = &l.project;
@@ -121,7 +121,7 @@ fn v8_subclip_loads_with_m3_10_defaults() {
 
 #[test]
 fn upgraded_file_resaves_in_current_schema_losslessly() {
-    let old = decode(&fixture("v1-edit.fcproj")).unwrap().project;
+    let old = decode(&fixture("v1-edit.evofilm")).unwrap().project;
     let bytes = encode(&old, true);
     let v: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
     assert_eq!(v["schema_version"], SCHEMA_VERSION);
@@ -132,17 +132,17 @@ fn upgraded_file_resaves_in_current_schema_losslessly() {
 
 #[test]
 fn future_schema_is_refused_with_a_clear_error() {
-    let mut v: serde_json::Value = serde_json::from_slice(&fixture("v1-minimal.fcproj")).unwrap();
+    let mut v: serde_json::Value = serde_json::from_slice(&fixture("v1-minimal.evofilm")).unwrap();
     // A bare v1-shaped project claiming a future `version` is refused too.
     v["version"] = 99.into();
     let e = decode(&serde_json::to_vec(&v).unwrap()).unwrap_err();
     assert!(matches!(e, FormatError::TooNew { found: 99, .. }), "{e}");
-    assert!(e.to_string().contains("Update FilmCraft"));
+    assert!(e.to_string().contains("Update EvoFilm"));
 }
 
 /// Build a project with `n` clips (half video, half linked audio) on 4+4 tracks.
 pub fn big_project(n: usize) -> Project {
-    let mut p = decode(&fixture("v1-edit.fcproj")).unwrap().project;
+    let mut p = decode(&fixture("v1-edit.evofilm")).unwrap().project;
     let seq_id = ItemId(21);
     let mut next = 1_000_000u64;
     let seq = match &mut p.items.get_mut(&seq_id).unwrap().kind {
@@ -157,10 +157,10 @@ pub fn big_project(n: usize) -> Project {
     let mut vt = seq.video_tracks[0].clone();
     let mut at = seq.audio_tracks[0].clone();
     for k in 1..4 {
-        vt.id = filmcraft_project::TrackId(500 + k);
+        vt.id = evofilm_project::TrackId(500 + k);
         vt.name = format!("Video {}", k + 1);
         seq.video_tracks.push(vt.clone());
-        at.id = filmcraft_project::TrackId(600 + k);
+        at.id = evofilm_project::TrackId(600 + k);
         at.name = format!("Audio {}", k + 1);
         seq.audio_tracks.push(at.clone());
     }
@@ -209,9 +209,9 @@ fn large_project_roundtrip_and_timing() {
     let decode_ms = t0.elapsed().as_secs_f64() * 1000.0;
     assert_eq!(back.project, p);
     let t0 = std::time::Instant::now();
-    let dir = std::env::temp_dir().join(format!("filmcraft-big-{}", std::process::id()));
+    let dir = std::env::temp_dir().join(format!("evofilm-big-{}", std::process::id()));
     std::fs::create_dir_all(&dir).unwrap();
-    filmcraft_format::atomic_write(&dir.join("big.fcproj"), &compact).unwrap();
+    evofilm_format::atomic_write(&dir.join("big.evofilm"), &compact).unwrap();
     let write_ms = t0.elapsed().as_secs_f64() * 1000.0;
     std::fs::remove_dir_all(&dir).unwrap();
     println!(
@@ -223,13 +223,13 @@ fn large_project_roundtrip_and_timing() {
 
 #[test]
 fn v8_loads_without_transcripts_and_v9_roundtrips_them() {
-    let l = decode(&fixture("v8-minimal.fcproj")).unwrap();
+    let l = decode(&fixture("v8-minimal.evofilm")).unwrap();
     assert_eq!(l.schema_version, 8);
     assert!(l.migrated());
     assert!(l.project.transcripts.is_empty());
     let mut p = l.project;
-    let mut t = filmcraft_project::Transcript { language: "en".into(), source: "manual".into(), ..Default::default() };
-    t.words.push(filmcraft_project::Word::new("Hello", Tick(0), Tick(1000)));
+    let mut t = evofilm_project::Transcript { language: "en".into(), source: "manual".into(), ..Default::default() };
+    t.words.push(evofilm_project::Word::new("Hello", Tick(0), Tick(1000)));
     t.words[0].speaker = Some(0);
     t.normalize();
     p.transcripts.insert(ItemId(7), std::sync::Arc::new(t));
@@ -245,13 +245,13 @@ fn v8_loads_without_transcripts_and_v9_roundtrips_them() {
 /// responsive data and layers without style runs or pins load with those empty.
 #[test]
 fn v11_minimal_loads_without_graphics_design_data() {
-    let l = decode(&fixture("v11-minimal.fcproj")).unwrap();
+    let l = decode(&fixture("v11-minimal.evofilm")).unwrap();
     assert_eq!(l.schema_version, 11);
     assert!(l.migrated());
     let p = &l.project;
     assert_eq!(p.name, "Before Graphics Templates");
     assert!(p.source_graphics.is_empty());
-    assert!(p.root.find_bin(filmcraft_project::BinId(1)).is_some());
+    assert!(p.root.find_bin(evofilm_project::BinId(1)).is_some());
     let again = decode(&encode(p, true)).unwrap();
     assert_eq!(again.schema_version, SCHEMA_VERSION);
     const { assert!(SCHEMA_VERSION >= 12) };
@@ -262,7 +262,7 @@ fn v11_minimal_loads_without_graphics_design_data() {
 /// the project settings.
 #[test]
 fn v10_minimal_loads_with_m3_11_defaults() {
-    let l = decode(&fixture("v10-minimal.fcproj")).unwrap();
+    let l = decode(&fixture("v10-minimal.evofilm")).unwrap();
     assert_eq!(l.schema_version, 10);
     assert!(l.migrated());
     let p = &l.project;
@@ -271,7 +271,7 @@ fn v10_minimal_loads_with_m3_11_defaults() {
     assert_eq!((p.settings.title_safe, p.settings.action_safe), ((20.0, 20.0), (10.0, 10.0)));
     assert_eq!(p.settings.capture_format, "DV");
     assert_eq!(p.settings.scratch, Default::default());
-    assert!(p.root.find_bin(filmcraft_project::BinId(1)).is_some());
+    assert!(p.root.find_bin(evofilm_project::BinId(1)).is_some());
     let again = decode(&encode(p, true)).unwrap();
     assert_eq!(again.schema_version, SCHEMA_VERSION);
     assert_eq!(&again.project, p);
@@ -283,12 +283,12 @@ fn v10_minimal_loads_with_m3_11_defaults() {
 /// the loader forgets fails here.
 #[test]
 fn next_id_is_raised_past_every_id_in_the_file() {
-    use filmcraft_project::{
+    use evofilm_project::{
         BinId, Camera, Caption, CaptionFormat, CaptionTrack, Label, Marker, MarkerId, MarkerKind, MergedClip, MulticamSource, Narration, ProjectLut, SearchBin,
         Track, TrackId, TrackKind, TrackSend, Transition, TransitionId,
     };
     const BIG: u64 = 5_000_000;
-    let base = decode(&fixture("v1-edit.fcproj")).unwrap().project;
+    let base = decode(&fixture("v1-edit.evofilm")).unwrap().project;
     let seq = ItemId(21);
     let marker = |id| Marker {
         id: MarkerId(id),
@@ -387,7 +387,7 @@ fn next_id_is_raised_past_every_id_in_the_file() {
         (
             "subclip's parent",
             Box::new(|p| {
-                let range = filmcraft_time::TimeRange::new(Tick::ZERO, Tick(1));
+                let range = evofilm_time::TimeRange::new(Tick::ZERO, Tick(1));
                 p.add_item("Subclip", Label::Iris, ItemKind::Subclip { parent: ItemId(BIG), range, restrict_trims: false }, None);
             }),
         ),
@@ -440,12 +440,12 @@ fn next_id_is_raised_past_every_id_in_the_file() {
 /// after a save and a reload.
 #[test]
 fn a_new_item_never_replaces_one_from_a_file_with_a_stale_next_id() {
-    let mut p = decode(&fixture("v1-edit.fcproj")).unwrap().project;
+    let mut p = decode(&fixture("v1-edit.evofilm")).unwrap().project;
     p.next_id = 5;
     let mut p = decode(&encode(&p, false)).unwrap().project;
     let before = p.items.len();
     let kind = p.item(ItemId(5)).unwrap().kind.clone();
-    let new = p.add_item("Copy", filmcraft_project::Label::Iris, kind, None);
+    let new = p.add_item("Copy", evofilm_project::Label::Iris, kind, None);
     assert_ne!(new, ItemId(5));
     assert_eq!(p.items.len(), before + 1, "a new item replaced an old one");
     assert_eq!(p.item(ItemId(5)).unwrap().name, "Ocean_Sunset.mp4");
@@ -459,8 +459,8 @@ fn a_new_item_never_replaces_one_from_a_file_with_a_stale_next_id() {
 /// wrapping to 0 (release) on the first new item.
 #[test]
 fn an_exhausted_id_space_is_refused_on_load() {
-    use filmcraft_project::MarkerId;
-    let base = decode(&fixture("v1-edit.fcproj")).unwrap().project;
+    use evofilm_project::MarkerId;
+    let base = decode(&fixture("v1-edit.evofilm")).unwrap().project;
     let mut p = base.clone();
     p.sequence_mut(ItemId(21)).unwrap().markers[0].id = MarkerId(u64::MAX);
     let e = decode(&encode(&p, false)).unwrap_err();

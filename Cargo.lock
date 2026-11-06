@@ -1012,28 +1012,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "craft-docpath"
-version = "0.1.0"
-source = "git+https://github.com/storytold/craft-libs?rev=82a24b006eefa036b43c09a67fb9a3fbd17ffe63#82a24b006eefa036b43c09a67fb9a3fbd17ffe63"
-
-[[package]]
-name = "craft-media"
-version = "0.1.0"
-source = "git+https://github.com/storytold/craft-libs?rev=f0ad6c1e1d297908915f4be315b0fcfc9be7b5d4#f0ad6c1e1d297908915f4be315b0fcfc9be7b5d4"
-dependencies = [
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "craft-ui"
-version = "0.1.0"
-source = "git+https://github.com/storytold/craft-libs?rev=5c874d51eeb3de70e735c8ce87a59a7dedd47675#5c874d51eeb3de70e735c8ce87a59a7dedd47675"
-dependencies = [
- "egui",
- "serde",
-]
-
-[[package]]
 name = "crc32fast"
 version = "1.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1627,6 +1605,761 @@ dependencies = [
 ]
 
 [[package]]
+name = "evo-docpath"
+version = "0.1.0"
+
+[[package]]
+name = "evo-media"
+version = "0.1.0"
+dependencies = [
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "evo-ui"
+version = "0.1.0"
+dependencies = [
+ "egui",
+ "serde",
+]
+
+[[package]]
+name = "evofilm"
+version = "0.13.0"
+dependencies = [
+ "arboard",
+ "chrono",
+ "cpal",
+ "eframe",
+ "egui",
+ "evofilm-engine",
+ "evofilm-export",
+ "evofilm-gpu",
+ "evofilm-platform",
+ "evofilm-project",
+ "evofilm-render",
+ "evofilm-time",
+ "evofilm-ui-egui",
+ "glob",
+ "log",
+ "muda",
+ "objc2 0.6.4",
+ "objc2-app-kit 0.3.2",
+ "objc2-foundation 0.3.2",
+ "open",
+ "pollster 0.4.0",
+ "rfd",
+ "serde_json",
+ "subtle",
+ "sys-locale",
+ "winit",
+ "winresource",
+ "zbus",
+]
+
+[[package]]
+name = "evofilm-aac"
+version = "0.13.0"
+dependencies = [
+ "evofilm-bitstream",
+ "evofilm-testkit",
+ "rayon",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "evofilm-ac3"
+version = "0.13.0"
+dependencies = [
+ "evofilm-testkit",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "evofilm-apv"
+version = "0.13.0"
+dependencies = [
+ "evofilm-bitstream",
+ "evofilm-testkit",
+ "rayon",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "evofilm-audio-dsp"
+version = "0.13.0"
+dependencies = [
+ "evofilm-testkit",
+]
+
+[[package]]
+name = "evofilm-automation"
+version = "0.13.0"
+dependencies = [
+ "base64 0.22.1",
+ "evofilm-engine",
+ "evofilm-time",
+ "image",
+ "rmcp",
+ "schemars",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 2.0.21",
+ "tokio",
+]
+
+[[package]]
+name = "evofilm-av1"
+version = "0.13.0"
+dependencies = [
+ "evofilm-bitstream",
+ "evofilm-testkit",
+ "rayon",
+ "rustix 1.1.5",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "evofilm-avi"
+version = "0.13.0"
+dependencies = [
+ "evofilm-testkit",
+]
+
+[[package]]
+name = "evofilm-bitstream"
+version = "0.13.0"
+dependencies = [
+ "evo-media",
+]
+
+[[package]]
+name = "evofilm-captions"
+version = "0.13.0"
+dependencies = [
+ "evofilm-color",
+ "evofilm-project",
+ "evofilm-text",
+ "evofilm-time",
+ "proptest",
+ "roxmltree",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "evofilm-cfb"
+version = "0.13.0"
+
+[[package]]
+name = "evofilm-cli"
+version = "0.13.0"
+dependencies = [
+ "evofilm-automation",
+ "evofilm-codecs",
+ "evofilm-engine",
+ "evofilm-export",
+ "evofilm-gpu",
+ "evofilm-media",
+ "evofilm-mpegts",
+ "evofilm-mxf",
+ "evofilm-ogg",
+ "evofilm-platform",
+ "evofilm-project",
+ "evofilm-render",
+ "evofilm-testkit",
+ "evofilm-time",
+ "serde_json",
+ "tokio",
+]
+
+[[package]]
+name = "evofilm-codecs"
+version = "0.13.0"
+dependencies = [
+ "evofilm-aac",
+ "evofilm-ac3",
+ "evofilm-apv",
+ "evofilm-av1",
+ "evofilm-avi",
+ "evofilm-bitstream",
+ "evofilm-color",
+ "evofilm-dnx",
+ "evofilm-frame",
+ "evofilm-h264",
+ "evofilm-hevc",
+ "evofilm-isobmff",
+ "evofilm-matroska",
+ "evofilm-media",
+ "evofilm-mpa",
+ "evofilm-mpeg2v",
+ "evofilm-mpegts",
+ "evofilm-mxf",
+ "evofilm-ogg",
+ "evofilm-opus",
+ "evofilm-prores",
+ "evofilm-testkit",
+ "evofilm-time",
+ "evofilm-vp8",
+ "evofilm-vp9",
+ "image",
+ "log",
+ "rayon",
+ "serde_json",
+ "symphonia",
+ "thiserror 2.0.21",
+ "web-time",
+]
+
+[[package]]
+name = "evofilm-color"
+version = "0.13.0"
+dependencies = [
+ "proptest",
+ "serde",
+]
+
+[[package]]
+name = "evofilm-dng"
+version = "0.13.0"
+dependencies = [
+ "evofilm-dng",
+ "rayon",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "evofilm-dnx"
+version = "0.13.0"
+dependencies = [
+ "evofilm-bitstream",
+ "evofilm-testkit",
+ "rayon",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "evofilm-edit"
+version = "0.13.0"
+dependencies = [
+ "evofilm-geom",
+ "evofilm-media",
+ "evofilm-project",
+ "evofilm-time",
+ "proptest",
+ "serde_json",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "evofilm-engine"
+version = "0.13.0"
+dependencies = [
+ "chrono",
+ "evo-docpath",
+ "evofilm-audio-dsp",
+ "evofilm-captions",
+ "evofilm-codecs",
+ "evofilm-color",
+ "evofilm-dng",
+ "evofilm-edit",
+ "evofilm-export",
+ "evofilm-format",
+ "evofilm-frame",
+ "evofilm-geom",
+ "evofilm-interchange",
+ "evofilm-isobmff",
+ "evofilm-media",
+ "evofilm-mxf",
+ "evofilm-project",
+ "evofilm-render",
+ "evofilm-scopes",
+ "evofilm-speech",
+ "evofilm-testkit",
+ "evofilm-text",
+ "evofilm-time",
+ "evofilm-tts",
+ "image",
+ "log",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.21",
+ "web-time",
+]
+
+[[package]]
+name = "evofilm-export"
+version = "0.13.0"
+dependencies = [
+ "evofilm-aac",
+ "evofilm-apv",
+ "evofilm-audio-dsp",
+ "evofilm-codecs",
+ "evofilm-color",
+ "evofilm-dnx",
+ "evofilm-flac",
+ "evofilm-frame",
+ "evofilm-geom",
+ "evofilm-h264enc",
+ "evofilm-isobmff",
+ "evofilm-media",
+ "evofilm-mxf",
+ "evofilm-project",
+ "evofilm-prores",
+ "evofilm-render",
+ "evofilm-testkit",
+ "evofilm-text",
+ "evofilm-time",
+ "image",
+ "rayon",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.21",
+ "web-time",
+]
+
+[[package]]
+name = "evofilm-flac"
+version = "0.13.0"
+dependencies = [
+ "evofilm-bitstream",
+ "evofilm-testkit",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "evofilm-format"
+version = "0.13.0"
+dependencies = [
+ "chrono",
+ "evofilm-media",
+ "evofilm-project",
+ "evofilm-time",
+ "log",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "evofilm-frame"
+version = "0.13.0"
+dependencies = [
+ "evofilm-color",
+ "evofilm-time",
+ "rayon",
+ "serde",
+]
+
+[[package]]
+name = "evofilm-geom"
+version = "0.13.0"
+dependencies = [
+ "proptest",
+ "serde",
+]
+
+[[package]]
+name = "evofilm-golden"
+version = "0.13.0"
+dependencies = [
+ "evofilm-color",
+ "evofilm-frame",
+ "evofilm-geom",
+ "evofilm-gpu",
+ "evofilm-media",
+ "evofilm-project",
+ "evofilm-render",
+ "evofilm-testkit",
+ "evofilm-time",
+ "pollster 0.4.0",
+ "wgpu",
+]
+
+[[package]]
+name = "evofilm-gpu"
+version = "0.13.0"
+dependencies = [
+ "evofilm-color",
+ "evofilm-export",
+ "evofilm-frame",
+ "evofilm-geom",
+ "evofilm-media",
+ "evofilm-project",
+ "evofilm-render",
+ "evofilm-time",
+ "image",
+ "log",
+ "pollster 0.4.0",
+ "rayon",
+ "wgpu",
+]
+
+[[package]]
+name = "evofilm-h264"
+version = "0.13.0"
+dependencies = [
+ "evofilm-bitstream",
+ "evofilm-testkit",
+ "rayon",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "evofilm-h264enc"
+version = "0.13.0"
+dependencies = [
+ "evofilm-bitstream",
+ "evofilm-testkit",
+ "rayon",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "evofilm-hevc"
+version = "0.13.0"
+dependencies = [
+ "evofilm-bitstream",
+ "evofilm-testkit",
+ "rayon",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "evofilm-interchange"
+version = "0.13.0"
+dependencies = [
+ "evofilm-cfb",
+ "evofilm-color",
+ "evofilm-geom",
+ "evofilm-media",
+ "evofilm-project",
+ "evofilm-time",
+ "proptest",
+ "roxmltree",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "evofilm-isobmff"
+version = "0.13.0"
+dependencies = [
+ "evo-media",
+ "evofilm-testkit",
+ "proptest",
+ "serde_json",
+]
+
+[[package]]
+name = "evofilm-matroska"
+version = "0.13.0"
+dependencies = [
+ "evo-media",
+ "evofilm-testkit",
+ "serde_json",
+]
+
+[[package]]
+name = "evofilm-media"
+version = "0.13.0"
+dependencies = [
+ "evofilm-color",
+ "evofilm-dng",
+ "evofilm-frame",
+ "evofilm-testkit",
+ "evofilm-time",
+ "image",
+ "png",
+ "rayon",
+ "serde",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "evofilm-mpa"
+version = "0.13.0"
+dependencies = [
+ "evofilm-bitstream",
+ "evofilm-testkit",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "evofilm-mpeg2v"
+version = "0.13.0"
+dependencies = [
+ "evofilm-testkit",
+ "rayon",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "evofilm-mpegts"
+version = "0.13.0"
+dependencies = [
+ "evofilm-testkit",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "evofilm-mxf"
+version = "0.13.0"
+dependencies = [
+ "chrono",
+ "evofilm-testkit",
+]
+
+[[package]]
+name = "evofilm-ogg"
+version = "0.13.0"
+dependencies = [
+ "evofilm-testkit",
+]
+
+[[package]]
+name = "evofilm-opus"
+version = "0.13.0"
+dependencies = [
+ "evofilm-testkit",
+]
+
+[[package]]
+name = "evofilm-platform"
+version = "0.13.0"
+dependencies = [
+ "evofilm-bitstream",
+ "evofilm-codecs",
+ "evofilm-color",
+ "evofilm-export",
+ "evofilm-frame",
+ "evofilm-h264",
+ "evofilm-hevc",
+ "evofilm-isobmff",
+ "evofilm-media",
+ "evofilm-project",
+ "evofilm-render",
+ "evofilm-testkit",
+ "evofilm-time",
+ "libloading",
+ "log",
+ "objc2-core-foundation",
+ "objc2-core-media",
+ "objc2-core-video",
+ "objc2-video-toolbox",
+ "windows 0.62.2",
+]
+
+[[package]]
+name = "evofilm-project"
+version = "0.13.0"
+dependencies = [
+ "evofilm-color",
+ "evofilm-geom",
+ "evofilm-media",
+ "evofilm-time",
+ "proptest",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "evofilm-prores"
+version = "0.13.0"
+dependencies = [
+ "evofilm-bitstream",
+ "evofilm-testkit",
+ "rayon",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "evofilm-render"
+version = "0.13.0"
+dependencies = [
+ "evofilm-audio-dsp",
+ "evofilm-captions",
+ "evofilm-color",
+ "evofilm-frame",
+ "evofilm-geom",
+ "evofilm-media",
+ "evofilm-project",
+ "evofilm-text",
+ "evofilm-time",
+ "image",
+ "rayon",
+ "rustix 1.1.5",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "evofilm-scopes"
+version = "0.13.0"
+dependencies = [
+ "evofilm-color",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "evofilm-speech"
+version = "0.13.0"
+dependencies = [
+ "candle-core",
+ "candle-nn",
+ "evofilm-project",
+ "evofilm-time",
+ "rayon",
+ "rustls",
+ "rustls-rustcrypto",
+ "serde",
+ "serde_json",
+ "sha2",
+ "tempfile",
+ "thiserror 2.0.21",
+ "ureq",
+]
+
+[[package]]
+name = "evofilm-testkit"
+version = "0.13.0"
+dependencies = [
+ "chrono",
+ "png",
+ "tempfile",
+]
+
+[[package]]
+name = "evofilm-text"
+version = "0.13.0"
+dependencies = [
+ "evofilm-color",
+ "harfrust",
+ "skrifa",
+ "tempfile",
+ "unicode-bidi",
+ "unicode-linebreak",
+ "unicode-segmentation",
+]
+
+[[package]]
+name = "evofilm-time"
+version = "0.13.0"
+dependencies = [
+ "proptest",
+ "serde",
+]
+
+[[package]]
+name = "evofilm-tts"
+version = "0.13.0"
+dependencies = [
+ "candle-core",
+ "candle-nn",
+ "evofilm-audio-dsp",
+ "evofilm-tts-text",
+ "serde",
+ "serde_json",
+ "sha2",
+ "thiserror 2.0.21",
+ "zip",
+]
+
+[[package]]
+name = "evofilm-tts-text"
+version = "0.13.0"
+dependencies = [
+ "serde",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "evofilm-ui-egui"
+version = "0.13.0"
+dependencies = [
+ "cpu-time",
+ "eframe",
+ "egui",
+ "egui_kittest",
+ "evo-ui",
+ "evofilm-audio-dsp",
+ "evofilm-codecs",
+ "evofilm-color",
+ "evofilm-edit",
+ "evofilm-engine",
+ "evofilm-export",
+ "evofilm-frame",
+ "evofilm-geom",
+ "evofilm-gpu",
+ "evofilm-interchange",
+ "evofilm-media",
+ "evofilm-platform",
+ "evofilm-project",
+ "evofilm-render",
+ "evofilm-scopes",
+ "evofilm-text",
+ "evofilm-time",
+ "evofilm-tts",
+ "image",
+ "log",
+ "pollster 0.4.0",
+ "rayon",
+ "rustix 1.1.5",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "toml 1.1.6+spec-1.1.0",
+ "unicode-bidi",
+ "web-time",
+]
+
+[[package]]
+name = "evofilm-vp8"
+version = "0.13.0"
+dependencies = [
+ "evofilm-testkit",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "evofilm-vp9"
+version = "0.13.0"
+dependencies = [
+ "evofilm-bitstream",
+ "evofilm-testkit",
+ "rayon",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "evofilm-web"
+version = "0.13.0"
+dependencies = [
+ "eframe",
+ "egui",
+ "evofilm-codecs",
+ "evofilm-color",
+ "evofilm-engine",
+ "evofilm-format",
+ "evofilm-frame",
+ "evofilm-isobmff",
+ "evofilm-media",
+ "evofilm-time",
+ "evofilm-ui-egui",
+ "js-sys",
+ "log",
+ "serde_json",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
+ "web-time",
+]
+
+[[package]]
 name = "extended"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1683,742 +2416,6 @@ checksum = "38e2275cc4e4fc009b0669731a1e5ab7ebf11f469eaede2bab9309a5b4d6057f"
 dependencies = [
  "memoffset",
  "rustc_version",
-]
-
-[[package]]
-name = "filmcraft"
-version = "0.13.0"
-dependencies = [
- "arboard",
- "chrono",
- "cpal",
- "eframe",
- "egui",
- "filmcraft-engine",
- "filmcraft-export",
- "filmcraft-gpu",
- "filmcraft-platform",
- "filmcraft-project",
- "filmcraft-render",
- "filmcraft-time",
- "filmcraft-ui-egui",
- "glob",
- "log",
- "muda",
- "objc2 0.6.4",
- "objc2-app-kit 0.3.2",
- "objc2-foundation 0.3.2",
- "open",
- "pollster 0.4.0",
- "rfd",
- "serde_json",
- "subtle",
- "sys-locale",
- "winit",
- "winresource",
- "zbus",
-]
-
-[[package]]
-name = "filmcraft-aac"
-version = "0.13.0"
-dependencies = [
- "filmcraft-bitstream",
- "filmcraft-testkit",
- "rayon",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "filmcraft-ac3"
-version = "0.13.0"
-dependencies = [
- "filmcraft-testkit",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "filmcraft-apv"
-version = "0.13.0"
-dependencies = [
- "filmcraft-bitstream",
- "filmcraft-testkit",
- "rayon",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "filmcraft-audio-dsp"
-version = "0.13.0"
-dependencies = [
- "filmcraft-testkit",
-]
-
-[[package]]
-name = "filmcraft-automation"
-version = "0.13.0"
-dependencies = [
- "base64 0.22.1",
- "filmcraft-engine",
- "filmcraft-time",
- "image",
- "rmcp",
- "schemars",
- "serde",
- "serde_json",
- "tempfile",
- "thiserror 2.0.21",
- "tokio",
-]
-
-[[package]]
-name = "filmcraft-av1"
-version = "0.13.0"
-dependencies = [
- "filmcraft-bitstream",
- "filmcraft-testkit",
- "rayon",
- "rustix 1.1.5",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "filmcraft-avi"
-version = "0.13.0"
-dependencies = [
- "filmcraft-testkit",
-]
-
-[[package]]
-name = "filmcraft-bitstream"
-version = "0.13.0"
-dependencies = [
- "craft-media",
-]
-
-[[package]]
-name = "filmcraft-captions"
-version = "0.13.0"
-dependencies = [
- "filmcraft-color",
- "filmcraft-project",
- "filmcraft-text",
- "filmcraft-time",
- "proptest",
- "roxmltree",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "filmcraft-cfb"
-version = "0.13.0"
-
-[[package]]
-name = "filmcraft-cli"
-version = "0.13.0"
-dependencies = [
- "filmcraft-automation",
- "filmcraft-codecs",
- "filmcraft-engine",
- "filmcraft-export",
- "filmcraft-gpu",
- "filmcraft-media",
- "filmcraft-mpegts",
- "filmcraft-mxf",
- "filmcraft-ogg",
- "filmcraft-platform",
- "filmcraft-project",
- "filmcraft-render",
- "filmcraft-testkit",
- "filmcraft-time",
- "serde_json",
- "tokio",
-]
-
-[[package]]
-name = "filmcraft-codecs"
-version = "0.13.0"
-dependencies = [
- "filmcraft-aac",
- "filmcraft-ac3",
- "filmcraft-apv",
- "filmcraft-av1",
- "filmcraft-avi",
- "filmcraft-bitstream",
- "filmcraft-color",
- "filmcraft-dnx",
- "filmcraft-frame",
- "filmcraft-h264",
- "filmcraft-hevc",
- "filmcraft-isobmff",
- "filmcraft-matroska",
- "filmcraft-media",
- "filmcraft-mpa",
- "filmcraft-mpeg2v",
- "filmcraft-mpegts",
- "filmcraft-mxf",
- "filmcraft-ogg",
- "filmcraft-opus",
- "filmcraft-prores",
- "filmcraft-testkit",
- "filmcraft-time",
- "filmcraft-vp8",
- "filmcraft-vp9",
- "image",
- "log",
- "rayon",
- "serde_json",
- "symphonia",
- "thiserror 2.0.21",
- "web-time",
-]
-
-[[package]]
-name = "filmcraft-color"
-version = "0.13.0"
-dependencies = [
- "proptest",
- "serde",
-]
-
-[[package]]
-name = "filmcraft-dng"
-version = "0.13.0"
-dependencies = [
- "filmcraft-dng",
- "rayon",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "filmcraft-dnx"
-version = "0.13.0"
-dependencies = [
- "filmcraft-bitstream",
- "filmcraft-testkit",
- "rayon",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "filmcraft-edit"
-version = "0.13.0"
-dependencies = [
- "filmcraft-geom",
- "filmcraft-media",
- "filmcraft-project",
- "filmcraft-time",
- "proptest",
- "serde_json",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "filmcraft-engine"
-version = "0.13.0"
-dependencies = [
- "chrono",
- "craft-docpath",
- "filmcraft-audio-dsp",
- "filmcraft-captions",
- "filmcraft-codecs",
- "filmcraft-color",
- "filmcraft-dng",
- "filmcraft-edit",
- "filmcraft-export",
- "filmcraft-format",
- "filmcraft-frame",
- "filmcraft-geom",
- "filmcraft-interchange",
- "filmcraft-isobmff",
- "filmcraft-media",
- "filmcraft-mxf",
- "filmcraft-project",
- "filmcraft-render",
- "filmcraft-scopes",
- "filmcraft-speech",
- "filmcraft-testkit",
- "filmcraft-text",
- "filmcraft-time",
- "filmcraft-tts",
- "image",
- "log",
- "serde",
- "serde_json",
- "thiserror 2.0.21",
- "web-time",
-]
-
-[[package]]
-name = "filmcraft-export"
-version = "0.13.0"
-dependencies = [
- "filmcraft-aac",
- "filmcraft-apv",
- "filmcraft-audio-dsp",
- "filmcraft-codecs",
- "filmcraft-color",
- "filmcraft-dnx",
- "filmcraft-flac",
- "filmcraft-frame",
- "filmcraft-geom",
- "filmcraft-h264enc",
- "filmcraft-isobmff",
- "filmcraft-media",
- "filmcraft-mxf",
- "filmcraft-project",
- "filmcraft-prores",
- "filmcraft-render",
- "filmcraft-testkit",
- "filmcraft-text",
- "filmcraft-time",
- "image",
- "rayon",
- "serde",
- "serde_json",
- "thiserror 2.0.21",
- "web-time",
-]
-
-[[package]]
-name = "filmcraft-flac"
-version = "0.13.0"
-dependencies = [
- "filmcraft-bitstream",
- "filmcraft-testkit",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "filmcraft-format"
-version = "0.13.0"
-dependencies = [
- "chrono",
- "filmcraft-media",
- "filmcraft-project",
- "filmcraft-time",
- "log",
- "serde",
- "serde_json",
- "tempfile",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "filmcraft-frame"
-version = "0.13.0"
-dependencies = [
- "filmcraft-color",
- "filmcraft-time",
- "rayon",
- "serde",
-]
-
-[[package]]
-name = "filmcraft-geom"
-version = "0.13.0"
-dependencies = [
- "proptest",
- "serde",
-]
-
-[[package]]
-name = "filmcraft-golden"
-version = "0.13.0"
-dependencies = [
- "filmcraft-color",
- "filmcraft-frame",
- "filmcraft-geom",
- "filmcraft-gpu",
- "filmcraft-media",
- "filmcraft-project",
- "filmcraft-render",
- "filmcraft-testkit",
- "filmcraft-time",
- "pollster 0.4.0",
- "wgpu",
-]
-
-[[package]]
-name = "filmcraft-gpu"
-version = "0.13.0"
-dependencies = [
- "filmcraft-color",
- "filmcraft-export",
- "filmcraft-frame",
- "filmcraft-geom",
- "filmcraft-media",
- "filmcraft-project",
- "filmcraft-render",
- "filmcraft-time",
- "image",
- "log",
- "pollster 0.4.0",
- "rayon",
- "wgpu",
-]
-
-[[package]]
-name = "filmcraft-h264"
-version = "0.13.0"
-dependencies = [
- "filmcraft-bitstream",
- "filmcraft-testkit",
- "rayon",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "filmcraft-h264enc"
-version = "0.13.0"
-dependencies = [
- "filmcraft-bitstream",
- "filmcraft-testkit",
- "rayon",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "filmcraft-hevc"
-version = "0.13.0"
-dependencies = [
- "filmcraft-bitstream",
- "filmcraft-testkit",
- "rayon",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "filmcraft-interchange"
-version = "0.13.0"
-dependencies = [
- "filmcraft-cfb",
- "filmcraft-color",
- "filmcraft-geom",
- "filmcraft-media",
- "filmcraft-project",
- "filmcraft-time",
- "proptest",
- "roxmltree",
- "serde",
- "serde_json",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "filmcraft-isobmff"
-version = "0.13.0"
-dependencies = [
- "craft-media",
- "filmcraft-testkit",
- "proptest",
- "serde_json",
-]
-
-[[package]]
-name = "filmcraft-matroska"
-version = "0.13.0"
-dependencies = [
- "craft-media",
- "filmcraft-testkit",
- "serde_json",
-]
-
-[[package]]
-name = "filmcraft-media"
-version = "0.13.0"
-dependencies = [
- "filmcraft-color",
- "filmcraft-dng",
- "filmcraft-frame",
- "filmcraft-testkit",
- "filmcraft-time",
- "image",
- "png",
- "rayon",
- "serde",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "filmcraft-mpa"
-version = "0.13.0"
-dependencies = [
- "filmcraft-bitstream",
- "filmcraft-testkit",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "filmcraft-mpeg2v"
-version = "0.13.0"
-dependencies = [
- "filmcraft-testkit",
- "rayon",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "filmcraft-mpegts"
-version = "0.13.0"
-dependencies = [
- "filmcraft-testkit",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "filmcraft-mxf"
-version = "0.13.0"
-dependencies = [
- "chrono",
- "filmcraft-testkit",
-]
-
-[[package]]
-name = "filmcraft-ogg"
-version = "0.13.0"
-dependencies = [
- "filmcraft-testkit",
-]
-
-[[package]]
-name = "filmcraft-opus"
-version = "0.13.0"
-dependencies = [
- "filmcraft-testkit",
-]
-
-[[package]]
-name = "filmcraft-platform"
-version = "0.13.0"
-dependencies = [
- "filmcraft-bitstream",
- "filmcraft-codecs",
- "filmcraft-color",
- "filmcraft-export",
- "filmcraft-frame",
- "filmcraft-h264",
- "filmcraft-hevc",
- "filmcraft-isobmff",
- "filmcraft-media",
- "filmcraft-project",
- "filmcraft-render",
- "filmcraft-testkit",
- "filmcraft-time",
- "libloading",
- "log",
- "objc2-core-foundation",
- "objc2-core-media",
- "objc2-core-video",
- "objc2-video-toolbox",
- "windows 0.62.2",
-]
-
-[[package]]
-name = "filmcraft-project"
-version = "0.13.0"
-dependencies = [
- "filmcraft-color",
- "filmcraft-geom",
- "filmcraft-media",
- "filmcraft-time",
- "proptest",
- "serde",
- "serde_json",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "filmcraft-prores"
-version = "0.13.0"
-dependencies = [
- "filmcraft-bitstream",
- "filmcraft-testkit",
- "rayon",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "filmcraft-render"
-version = "0.13.0"
-dependencies = [
- "filmcraft-audio-dsp",
- "filmcraft-captions",
- "filmcraft-color",
- "filmcraft-frame",
- "filmcraft-geom",
- "filmcraft-media",
- "filmcraft-project",
- "filmcraft-text",
- "filmcraft-time",
- "image",
- "rayon",
- "rustix 1.1.5",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "filmcraft-scopes"
-version = "0.13.0"
-dependencies = [
- "filmcraft-color",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "filmcraft-speech"
-version = "0.13.0"
-dependencies = [
- "candle-core",
- "candle-nn",
- "filmcraft-project",
- "filmcraft-time",
- "rayon",
- "rustls",
- "rustls-rustcrypto",
- "serde",
- "serde_json",
- "sha2",
- "tempfile",
- "thiserror 2.0.21",
- "ureq",
-]
-
-[[package]]
-name = "filmcraft-testkit"
-version = "0.13.0"
-dependencies = [
- "chrono",
- "png",
- "tempfile",
-]
-
-[[package]]
-name = "filmcraft-text"
-version = "0.13.0"
-dependencies = [
- "filmcraft-color",
- "harfrust",
- "skrifa",
- "tempfile",
- "unicode-bidi",
- "unicode-linebreak",
- "unicode-segmentation",
-]
-
-[[package]]
-name = "filmcraft-time"
-version = "0.13.0"
-dependencies = [
- "proptest",
- "serde",
-]
-
-[[package]]
-name = "filmcraft-tts"
-version = "0.13.0"
-dependencies = [
- "candle-core",
- "candle-nn",
- "filmcraft-audio-dsp",
- "filmcraft-tts-text",
- "serde",
- "serde_json",
- "sha2",
- "thiserror 2.0.21",
- "zip",
-]
-
-[[package]]
-name = "filmcraft-tts-text"
-version = "0.13.0"
-dependencies = [
- "serde",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "filmcraft-ui-egui"
-version = "0.13.0"
-dependencies = [
- "cpu-time",
- "craft-ui",
- "eframe",
- "egui",
- "egui_kittest",
- "filmcraft-audio-dsp",
- "filmcraft-codecs",
- "filmcraft-color",
- "filmcraft-edit",
- "filmcraft-engine",
- "filmcraft-export",
- "filmcraft-frame",
- "filmcraft-geom",
- "filmcraft-gpu",
- "filmcraft-interchange",
- "filmcraft-media",
- "filmcraft-platform",
- "filmcraft-project",
- "filmcraft-render",
- "filmcraft-scopes",
- "filmcraft-text",
- "filmcraft-time",
- "filmcraft-tts",
- "image",
- "log",
- "pollster 0.4.0",
- "rayon",
- "rustix 1.1.5",
- "serde",
- "serde_json",
- "tempfile",
- "toml 1.1.6+spec-1.1.0",
- "unicode-bidi",
- "web-time",
-]
-
-[[package]]
-name = "filmcraft-vp8"
-version = "0.13.0"
-dependencies = [
- "filmcraft-testkit",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "filmcraft-vp9"
-version = "0.13.0"
-dependencies = [
- "filmcraft-bitstream",
- "filmcraft-testkit",
- "rayon",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "filmcraft-web"
-version = "0.13.0"
-dependencies = [
- "eframe",
- "egui",
- "filmcraft-codecs",
- "filmcraft-color",
- "filmcraft-engine",
- "filmcraft-format",
- "filmcraft-frame",
- "filmcraft-isobmff",
- "filmcraft-media",
- "filmcraft-time",
- "filmcraft-ui-egui",
- "js-sys",
- "log",
- "serde_json",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "web-sys",
- "web-time",
 ]
 
 [[package]]
@@ -7426,7 +7423,7 @@ checksum = "e450f9b2ed1dff33c94c12589a87338689467b9c4f5d8a5710bd09a847d2c8a7"
 name = "xtask"
 version = "0.13.0"
 dependencies = [
- "filmcraft-testkit",
+ "evofilm-testkit",
  "serde_json",
 ]
 

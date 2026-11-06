@@ -1,3 +1,3 @@
-# filmcraft-matroska
+# evofilm-matroska
 
-A re-export of `craft_media::matroska`. Documentation: https://github.com/storytold/craft-libs/blob/main/crates/media/README.md
+A re-export of `evo_media::matroska`. Documentation: vendor/evo-libs/blob/main/crates/media/README.md

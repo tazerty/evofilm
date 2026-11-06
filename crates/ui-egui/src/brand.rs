@@ -1,7 +1,7 @@
 //! The product wordmark, drawn on the About dialog and the Home screen.
 //!
-//! Evora fork (patch E1): the ArtCraft wordmark is a trademark that is not open source, and the
-//! ArtCraft trademark licence requires a modified version to remove it (docs/brand/LICENSE-brand.txt,
+//! Evora fork (patch E1): the Upstream wordmark is a trademark that is not open source, and the
+//! Upstream trademark licence requires a modified version to remove it (docs/brand/LICENSE-brand.txt,
 //! "Forks and modified versions"). This build embeds no wordmark: [`wordmark`] returns `None` and
 //! callers lay out their text without it. The files in `docs/brand/` stay in the repository (a copy
 //! of the repository may keep them) but are no longer compiled into any binary.

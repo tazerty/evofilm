@@ -7,7 +7,7 @@
 //!
 //! Patch COR-FK-B2 (Q10): the app's name. Whatever the language, a displayed string that names the
 //! upstream app ([`UPSTREAM_NAME`]) names Corte instead ([`rename`], applied by `Language::tr` after
-//! the lookup). Identifiers, the `window.filmcraft` API, file formats and the licence files (never
+//! the lookup). Identifiers, the `window.evofilm` API, file formats and the licence files (never
 //! drawn through `tr`) keep the upstream name.
 
 use std::cell::RefCell;
@@ -15,7 +15,7 @@ use std::collections::HashMap;
 use std::sync::OnceLock;
 
 /// The upstream app's name, as the catalogs write it.
-pub const UPSTREAM_NAME: &str = "FilmCraft";
+pub const UPSTREAM_NAME: &str = "EvoFilm";
 /// The name this build shows instead.
 pub const SHOWN_NAME: &str = "Corte";
 
@@ -140,7 +140,7 @@ mod tests {
     /// labels (keyboard shortcuts editor), built-in shortcut presets (shortcuts editor) and the
     /// history label of `lumetri.setSection` (crates/engine/src/color.rs, History panel).
     fn engine_sources() -> Vec<String> {
-        let mut out: Vec<String> = filmcraft_engine::Session::default()
+        let mut out: Vec<String> = evofilm_engine::Session::default()
             .execute("command.list", serde_json::json!({}))
             .ok()
             .and_then(|v| v.as_array().cloned())
@@ -148,7 +148,7 @@ mod tests {
             .iter()
             .filter_map(|c| c["label"].as_str().map(str::to_string))
             .collect();
-        out.extend(filmcraft_engine::shortcuts::BUILTIN_PRESETS.iter().map(|p| p.to_string()));
+        out.extend(evofilm_engine::shortcuts::BUILTIN_PRESETS.iter().map(|p| p.to_string()));
         out.push("Lumetri Section".into());
         out
     }
@@ -212,16 +212,16 @@ mod tests {
     /// Q10 (patch COR-FK-B2): the app is called Corte on screen, in every language.
     #[test]
     fn the_app_is_called_corte_on_screen() {
-        assert_eq!(Language::En.tr("About FilmCraft"), "About Corte");
-        assert_eq!(Language::En.tr("Quit FilmCraft"), "Quit Corte");
+        assert_eq!(Language::En.tr("About EvoFilm"), "About Corte");
+        assert_eq!(Language::En.tr("Quit EvoFilm"), "Quit Corte");
         for lang in Language::ALL {
-            let about = lang.tr("About FilmCraft");
+            let about = lang.tr("About EvoFilm");
             assert!(!about.contains(UPSTREAM_NAME) && about.contains(super::SHOWN_NAME), "{}: {about:?}", lang.code());
         }
         // text without the name is returned as it is; renamed text is made once
         assert_eq!(super::rename("File"), "File");
-        assert!(std::ptr::eq(super::rename("FilmCraft Project"), super::rename("FilmCraft Project")));
-        assert_eq!(super::rename("FilmCraft Project"), "Corte Project");
+        assert!(std::ptr::eq(super::rename("EvoFilm Project"), super::rename("EvoFilm Project")));
+        assert_eq!(super::rename("EvoFilm Project"), "Corte Project");
     }
 
     #[test]

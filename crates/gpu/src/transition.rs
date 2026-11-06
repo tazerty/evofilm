@@ -1,4 +1,4 @@
-use filmcraft_project::{EffectInstance, ParamValue};
+use evofilm_project::{EffectInstance, ParamValue};
 use wgpu::util::DeviceExt;
 
 pub(crate) struct PushStage {

@@ -11,8 +11,8 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
-use filmcraft_project::{ClipId, ItemId, ItemKind, MediaRef, Project, TrackKind};
-use filmcraft_time::Tick;
+use evofilm_project::{ClipId, ItemId, ItemKind, MediaRef, Project, TrackKind};
+use evofilm_time::Tick;
 use serde::{Deserialize, Serialize};
 
 /// What a piece of essence stands in for: a whole media item, or one clip's rendered audio.
@@ -160,7 +160,7 @@ fn collect_needs(
 ) {
     let Some(seq) = project.sequence(sequence) else { return };
     // a nest's needs do not depend on the clip that uses it: each sequence is listed once, so a
-    // crafted project with many clips of the same nest on every level cannot multiply the work
+    // built project with many clips of the same nest on every level cannot multiply the work
     // (a sequence cannot be inside itself, but a damaged project may claim so)
     if open.contains(&sequence) || done.contains(&sequence) || open.len() >= MAX_NESTING {
         return;
@@ -211,8 +211,8 @@ fn collect_needs(
                             continue;
                         }
                         let channels = match t.channels {
-                            filmcraft_project::AudioChannels::Mono => 1,
-                            filmcraft_project::AudioChannels::Surround51 => 6,
+                            evofilm_project::AudioChannels::Mono => 1,
+                            evofilm_project::AudioChannels::Surround51 => 6,
                             _ => 2,
                         };
                         let key = EssenceKey::Clip(c.id);

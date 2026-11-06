@@ -3,10 +3,10 @@
 #
 # Exports:
 #   ROOT                    workspace root
-#   VERSION                 [workspace.package] version from Cargo.toml (override: FILMCRAFT_VERSION)
+#   VERSION                 [workspace.package] version from Cargo.toml (override: EVOFILM_VERSION)
 #   DIST                    output directory for release artifacts (default: $ROOT/dist/release)
-#   FILMCRAFT_BUILD_SHA    git commit baked into the binaries (see crates/engine/src/build_info.rs)
-#   FILMCRAFT_BUILD_DATE   UTC build date, YYYY-MM-DD
+#   EVOFILM_BUILD_SHA    git commit baked into the binaries (see crates/engine/src/build_info.rs)
+#   EVOFILM_BUILD_DATE   UTC build date, YYYY-MM-DD
 #   CARGO_TARGET_DIR        cargo's target dir (default: $ROOT/target)
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -21,7 +21,7 @@ workspace_version() {
   ' "$ROOT/Cargo.toml"
 }
 
-VERSION="${FILMCRAFT_VERSION:-$(workspace_version)}"
+VERSION="${EVOFILM_VERSION:-$(workspace_version)}"
 if [[ -z "$VERSION" ]]; then
   echo "error: could not read [workspace.package] version from $ROOT/Cargo.toml" >&2
   exit 1
@@ -32,11 +32,11 @@ DIST="${DIST:-$ROOT/dist/release}"
 mkdir -p "$DIST"
 export DIST
 
-if [[ -z "${FILMCRAFT_BUILD_SHA:-}" ]]; then
-  FILMCRAFT_BUILD_SHA="$(git -C "$ROOT" rev-parse HEAD 2>/dev/null || true)"
+if [[ -z "${EVOFILM_BUILD_SHA:-}" ]]; then
+  EVOFILM_BUILD_SHA="$(git -C "$ROOT" rev-parse HEAD 2>/dev/null || true)"
 fi
-export FILMCRAFT_BUILD_SHA
-export FILMCRAFT_BUILD_DATE="${FILMCRAFT_BUILD_DATE:-$(date -u +%Y-%m-%d)}"
+export EVOFILM_BUILD_SHA
+export EVOFILM_BUILD_DATE="${EVOFILM_BUILD_DATE:-$(date -u +%Y-%m-%d)}"
 export CARGO_TARGET_DIR="${CARGO_TARGET_DIR:-$ROOT/target}"
 
 # Emit a GitHub Actions warning (plain stderr outside Actions).
@@ -45,7 +45,7 @@ warn() {
 }
 
 # Copy licence and readme files that exist into a package directory, plus the licences of the
-# craft-fonts fonts the build embedded (only when built with CRAFT_FONTS_DIR).
+# evo-fonts fonts the build embedded (only when built with EVO_FONTS_DIR).
 copy_docs() {
   local dest="$1" f
   for f in README.md LICENSE LICENSE-MIT LICENSE-APACHE COPYRIGHT; do
@@ -54,12 +54,12 @@ copy_docs() {
   copy_font_licences "$dest"
 }
 
-# Copy each craft-fonts licence ($CRAFT_FONTS_DIR/fonts/<family>/OFL.txt) to <dest>/OFL-<family>.txt.
-# Does nothing without CRAFT_FONTS_DIR.
+# Copy each evo-fonts licence ($EVO_FONTS_DIR/fonts/<family>/OFL.txt) to <dest>/OFL-<family>.txt.
+# Does nothing without EVO_FONTS_DIR.
 copy_font_licences() {
   local dest="$1" lic family
-  if [[ -z "${CRAFT_FONTS_DIR:-}" ]]; then return 0; fi
-  for lic in "$CRAFT_FONTS_DIR"/fonts/*/OFL.txt; do
+  if [[ -z "${EVO_FONTS_DIR:-}" ]]; then return 0; fi
+  for lic in "$EVO_FONTS_DIR"/fonts/*/OFL.txt; do
     [[ -f "$lic" ]] || continue
     family="$(basename "$(dirname "$lic")")"
     cp "$lic" "$dest/OFL-$family.txt"

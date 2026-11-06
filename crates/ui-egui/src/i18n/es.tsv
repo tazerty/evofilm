@@ -11,10 +11,10 @@
 # Clean-room: every entry was written from the plain meaning of the English text using ordinary
 # Spanish video-editing vocabulary (pista, cabezal, secuencia, bandeja, procesar…). No proprietary
 # localisation resource, string table or product UI was consulted or copied; add entries the same
-# way. Product and technology names (FilmCraft, Lumetri, ProRes, LUFS…) keep their
+# way. Product and technology names (EvoFilm, Lumetri, ProRes, LUFS…) keep their
 # spelling. "video" is written without an accent, as in the rest of this catalog.
 
-	About FilmCraft	Acerca de FilmCraft
+	About EvoFilm	Acerca de EvoFilm
 	Add Audio Submix Track	Añadir pista de submezcla de audio
 	Add Caption at Playhead	Añadir subtítulo en el cabezal
 	Add Chapter Marker…	Añadir marcador de capítulo…
@@ -132,8 +132,8 @@
 	File	Archivo
 	File…	Archivo…
 	Fill frame	Rellenar fotograma
-	FilmCraft Help…	Ayuda de FilmCraft…
-	FilmCraft on GitHub	FilmCraft en GitHub
+	EvoFilm Help…	Ayuda de EvoFilm…
+	EvoFilm on GitHub	EvoFilm en GitHub
 	Find Next	Buscar siguiente
 	Find…	Buscar…
 	Fit	Ajustar
@@ -308,7 +308,7 @@
 	Select Previous Graphic	Seleccionar gráfico anterior
 	Select Previous Layer	Seleccionar capa anterior
 	Selection Follows Playhead	La selección sigue al cabezal
-	Selection as FilmCraft Project…	Selección como proyecto de FilmCraft…
+	Selection as EvoFilm Project…	Selección como proyecto de EvoFilm…
 	Selection…	Selección…
 	Send Backward	Enviar atrás
 	Send to Back	Enviar al fondo
@@ -438,8 +438,8 @@
 	No background jobs.	No hay tareas en segundo plano.
 	Recover Unsaved Changes	Recuperar cambios no guardados
 	Untitled	Sin título
-	FilmCraft was closed while “{name}” had unsaved changes.	FilmCraft se cerró mientras “{name}” tenía cambios sin guardar.
-	FilmCraft quit unexpectedly while “{name}” had unsaved changes.	FilmCraft se cerró de forma inesperada mientras “{name}” tenía cambios sin guardar.
+	EvoFilm was closed while “{name}” had unsaved changes.	EvoFilm se cerró mientras “{name}” tenía cambios sin guardar.
+	EvoFilm quit unexpectedly while “{name}” had unsaved changes.	EvoFilm se cerró de forma inesperada mientras “{name}” tenía cambios sin guardar.
 	Recover unsaved changes from {when}?	¿Recuperar los cambios no guardados de {when}?
 	The project had not been saved yet.	El proyecto aún no se había guardado.
 	{n} sessions have unsaved changes:	{n} sesiones tienen cambios sin guardar:
@@ -969,7 +969,7 @@
 	Font family	Familia de fuentes
 	Label Colors	Colores de etiqueta
 	Decoded frames held for the monitors and thumbnails: {used} of {budget}.	Fotogramas descodificados en memoria para los monitores y miniaturas: {used} de {budget}.
-	FilmCraft keeps the rest of the RAM free for other applications.	FilmCraft deja el resto de la RAM libre para otras aplicaciones.
+	EvoFilm keeps the rest of the RAM free for other applications.	EvoFilm deja el resto de la RAM libre para otras aplicaciones.
 	not available in this session	no disponible en esta sesión
 	Currently: {loc} — {files} file(s), {size}	Actualmente: {loc} — {files} archivo(s), {size}
 	 ({ch} output channels)	 ({ch} canales de salida)
@@ -1080,7 +1080,7 @@
 	Video Frame	Fotograma de video
 	Pin To	Fijar a
 	Pinned Edges	Bordes fijados
-	FilmCraft Graphics Template	Plantilla de gráficos de FilmCraft
+	EvoFilm Graphics Template	Plantilla de gráficos de EvoFilm
 	{n} Font	{n} Fuente
 	{n} Size	{n} Tamaño
 	{n} Color	{n} Color
@@ -1090,7 +1090,7 @@
 	Export As Motion Graphics Template	Exportar como plantilla de animación
 	Category:	Categoría:
 	Editable properties:	Propiedades editables:
-	Saved as a FilmCraft graphics template (.fcgt) in your templates folder.	Se guarda como plantilla de gráficos de FilmCraft (.fcgt) en tu carpeta de plantillas.
+	Saved as a EvoFilm graphics template (.fcgt) in your templates folder.	Se guarda como plantilla de gráficos de EvoFilm (.fcgt) en tu carpeta de plantillas.
 	Exported graphics template to {path}	Plantilla de gráficos exportada a {path}
 	Replace Fonts in Projects	Reemplazar fuentes en proyectos
 	Fonts used in the project:	Fuentes usadas en el proyecto:
@@ -1461,7 +1461,7 @@
 	Center of Sphere	Centro de la esfera
 	Cents	Centésimas
 	Change to Color	Cambiar a color
-	Changes are copied in the background a moment after each edit. If FilmCraft quits unexpectedly, they are offered the next time it starts.	Los cambios se copian en segundo plano poco después de cada edición. Si FilmCraft se cierra de forma inesperada, se ofrecen la próxima vez que se inicie.
+	Changes are copied in the background a moment after each edit. If EvoFilm quits unexpectedly, they are offered the next time it starts.	Los cambios se copian en segundo plano poco después de cada edición. Si EvoFilm se cierra de forma inesperada, se ofrecen la próxima vez que se inicie.
 	Channel	Canal
 	Channel Blur	Desenfoque de canal
 	Channel Mix	Mezcla de canales
@@ -1834,13 +1834,13 @@
 	Hard Limiter	Limitador duro
 	Hard Mix	Mezcla definida
 	Hardware decoding	Descodificación por hardware
-	Hardware decoding: Auto uses the system's video decoder (VideoToolbox on macOS, Media Foundation on Windows, VA-API or NVDEC for H.264 and HEVC on Linux) for the streams it supports, and FilmCraft's own decoder for everything else or if the hardware fails. Media that is already open keeps its decoder until it is reopened.	Descodificación por hardware: Automático usa el descodificador de video del sistema (VideoToolbox en macOS, Media Foundation en Windows, VA-API o NVDEC para H.264 y HEVC en Linux) para los flujos que admite, y el descodificador propio de FilmCraft para todo lo demás o si falla el hardware. Los medios ya abiertos mantienen su descodificador hasta que se vuelven a abrir.
+	Hardware decoding: Auto uses the system's video decoder (VideoToolbox on macOS, Media Foundation on Windows, VA-API or NVDEC for H.264 and HEVC on Linux) for the streams it supports, and EvoFilm's own decoder for everything else or if the hardware fails. Media that is already open keeps its decoder until it is reopened.	Descodificación por hardware: Automático usa el descodificador de video del sistema (VideoToolbox en macOS, Media Foundation en Windows, VA-API o NVDEC para H.264 y HEVC en Linux) para los flujos que admite, y el descodificador propio de EvoFilm para todo lo demás o si falla el hardware. Los medios ya abiertos mantienen su descodificador hasta que se vuelven a abrir.
 	Head Size	Tamaño de la cabeza
 	Heart	Corazón
 	Height	Altura
 	Hexagon	Hexágono
 	Hide Back Face	Ocultar la cara posterior
-	Hide FilmCraft	Ocultar FilmCraft
+	Hide EvoFilm	Ocultar EvoFilm
 	Hide Others	Ocultar otras
 	High	Alta
 	High Cutoff	Corte de agudos
@@ -2111,7 +2111,7 @@
 	Night	Noche
 	No Motion	Sin movimiento
 	No Scroll	Sin desplazamiento
-	No plugins are installed. Changes will take effect the next time you start FilmCraft.	No hay complementos instalados. Los cambios se aplicarán la próxima vez que inicies FilmCraft.
+	No plugins are installed. Changes will take effect the next time you start EvoFilm.	No hay complementos instalados. Los cambios se aplicarán la próxima vez que inicies EvoFilm.
 	Noise	Ruido
 	Noise & Grain	Ruido y grano
 	Noise (Legacy)	Ruido (heredado)
@@ -2543,7 +2543,7 @@
 	Template Properties	Propiedades de la plantilla
 	Text Animator	Animador de texto
 	Text Color	Color del texto
-	The media cache holds render previews of unsaved projects and other files FilmCraft can recreate. Deleting them is always safe; FilmCraft rebuilds them as needed.	La caché de medios guarda previsualizaciones procesadas de proyectos sin guardar y otros archivos que FilmCraft puede volver a crear. Eliminarlos siempre es seguro; FilmCraft los regenera cuando hace falta.
+	The media cache holds render previews of unsaved projects and other files EvoFilm can recreate. Deleting them is always safe; EvoFilm rebuilds them as needed.	La caché de medios guarda previsualizaciones procesadas de proyectos sin guardar y otros archivos que EvoFilm puede volver a crear. Eliminarlos siempre es seguro; EvoFilm los regenera cuando hace falta.
 	Thickness	Grosor
 	Tile Gradient	Degradado en mosaico
 	Tilt	Inclinación
@@ -2753,8 +2753,8 @@
 	System Compatibility Report	Informe de compatibilidad del sistema
 	no GPU adapter: the CPU compositor is used	no hay adaptador de GPU: se usa el compositor de CPU
 	Avid Log Exchange	Avid Log Exchange
-	FilmCraft Project	Proyecto de FilmCraft
-	{name} Selection.fcproj	{name} Selección.fcproj
+	EvoFilm Project	Proyecto de EvoFilm
+	{name} Selection.evofilm	{name} Selección.evofilm
 	{name} (Simplified)	{name} (simplificada)
 	Find in:	Buscar en:
 	Find:	Buscar:
@@ -2893,7 +2893,7 @@
 	Start Queue	Iniciar cola
 	Stop	Detener
 	Clear Finished	Borrar terminadas
-	Not supported by FilmCraft's encoders yet	Los codificadores de FilmCraft aún no lo admiten
+	Not supported by EvoFilm's encoders yet	Los codificadores de EvoFilm aún no lo admiten
 	Sequence name	Nombre de la secuencia
 	Folder	Carpeta
 	Preset	Ajuste preestablecido
@@ -2983,7 +2983,7 @@
 	Drag a clip to slide it between its neighbours.	Arrastra un clip para deslizarlo entre sus vecinos.
 	Drag to scroll the timeline.	Arrastra para desplazar la línea de tiempo.
 	Click to zoom in; Opt-click to zoom out.	Haz clic para acercar; Opción+clic para alejar.
-	FilmCraft hit an error	FilmCraft ha encontrado un error
+	EvoFilm hit an error	EvoFilm ha encontrado un error
 	Details: {path}	Detalles: {path}
 	Opened {url}	Abierto {url}
 	(empty)	(vacío)
@@ -3243,7 +3243,7 @@
 	QuickTime, ProRes 4444 (4:4:4) with alpha channel, 24-bit 48 kHz PCM	QuickTime, ProRes 4444 (4:4:4) con canal alfa, PCM de 24 bits y 48 kHz
 	QuickTime, ProRes 4444 XQ (4:4:4), 24-bit 48 kHz PCM	QuickTime, ProRes 4444 XQ (4:4:4), PCM de 24 bits y 48 kHz
 	QuickTime, ProRes 422, 24-bit 48 kHz PCM	QuickTime, ProRes 422, PCM de 24 bits y 48 kHz
-	Quit FilmCraft	Salir de FilmCraft
+	Quit EvoFilm	Salir de EvoFilm
 	Rate Stretch Tool	Herramienta Ajuste de velocidad
 	Razor Tool	Herramienta Cuchilla
 	Rectangle Tool	Herramienta Rectángulo
@@ -3544,8 +3544,8 @@
 	Composite in Linear Color	Componer en color lineal
 	Auto Tone Map Media (HDR and log into SDR)	Mapeo de tonos automático de medios (HDR y log a SDR)
 	Configure…	Configurar…
-	Not supported in FilmCraft yet	FilmCraft aún no lo admite
-	FilmCraft always composites in linear light	FilmCraft siempre compone en luz lineal
+	Not supported in EvoFilm yet	EvoFilm aún no lo admite
+	EvoFilm always composites in linear light	EvoFilm siempre compone en luz lineal
 	Loop marked range	Bucle del intervalo marcado
 	Play Source	Reproducir origen
 	Source Play/Stop	Reproducir/Detener origen
@@ -3611,7 +3611,7 @@
 	Opens in your web browser: {url}	Se abre en el navegador web: {url}
 	Saves this session's log and shows it in your file manager.	Guarda el registro de esta sesión y lo muestra en el explorador de archivos.
 	Shows a report on this computer.	Muestra un informe sobre este equipo.
-	Shows the version, community links and credits in a FilmCraft window.	Muestra la versión, los enlaces de la comunidad y los créditos en una ventana de FilmCraft.
+	Shows the version, community links and credits in a EvoFilm window.	Muestra la versión, los enlaces de la comunidad y los créditos en una ventana de EvoFilm.
 	Couldn't open your web browser	No se pudo abrir el navegador web
 	Open this address in your browser yourself:	Abre esta dirección tú mismo en el navegador:
 # View ▸ Reset Interface Zoom (#2253).
@@ -3620,5 +3620,5 @@
 	Open a sequence to search its graphics	Abre una secuencia para buscar en sus gráficos
 	No text graphics in this sequence. Add text with the Type tool.	Esta secuencia no tiene gráficos con texto. Añade texto con la herramienta Texto.
 	No matching text.	Ningún texto coincide.
-	H.265 (HEVC) needs a hardware encoder (NVENC on NVIDIA GPUs, VideoToolbox on macOS); none was found on this machine, and FilmCraft has no software H.265 encoder yet. Choose H.264 or ProRes instead.	H.265 (HEVC) necesita un codificador por hardware (NVENC en GPU NVIDIA, VideoToolbox en macOS); no se encontró ninguno en este equipo y FilmCraft aún no tiene un codificador H.265 por software. Elija H.264 o ProRes.
-	AV1 needs a hardware encoder; none was found on this machine, and FilmCraft has no software AV1 encoder yet.	AV1 necesita un codificador por hardware; no se encontró ninguno en este equipo y FilmCraft aún no tiene un codificador AV1 por software.
+	H.265 (HEVC) needs a hardware encoder (NVENC on NVIDIA GPUs, VideoToolbox on macOS); none was found on this machine, and EvoFilm has no software H.265 encoder yet. Choose H.264 or ProRes instead.	H.265 (HEVC) necesita un codificador por hardware (NVENC en GPU NVIDIA, VideoToolbox en macOS); no se encontró ninguno en este equipo y EvoFilm aún no tiene un codificador H.265 por software. Elija H.264 o ProRes.
+	AV1 needs a hardware encoder; none was found on this machine, and EvoFilm has no software AV1 encoder yet.	AV1 necesita un codificador por hardware; no se encontró ninguno en este equipo y EvoFilm aún no tiene un codificador AV1 por software.

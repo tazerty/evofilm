@@ -1,0 +1,8 @@
+asset:        evofilm.ico
+title:        EvoFilm app icon, Windows .ico (16-256 px)
+author:       Brandon Thomas (EvoFilm owner), for the EvoFilm project
+source:       original work (drawn by the owner in Upstream, then vectorised)
+license:      MIT OR Apache-2.0
+license-file: assets/app-icon/LICENSE.txt
+added:        2026-10-02 by Claude (agent) for Brandon Thomas
+notes:        PNG renders of evofilm.svg (resvg) packed by cargo xtask ico in packaging/icons.sh. Embedded in evofilm.exe by apps/evofilm/build.rs.

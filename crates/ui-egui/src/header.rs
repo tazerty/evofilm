@@ -5,12 +5,12 @@
 
 use egui::{Color32, Rect, Sense, Stroke, pos2, vec2};
 
-use crate::FilmcraftApp;
+use crate::EvoFilmApp;
 use crate::icons::{self, Icon};
 use crate::state::Mode;
 use crate::theme::Tokens;
 
-pub fn show(app: &mut FilmcraftApp, ui: &mut egui::Ui, rect: Rect) {
+pub fn show(app: &mut EvoFilmApp, ui: &mut egui::Ui, rect: Rect) {
     let t = app.tokens;
     let p = ui.painter().clone();
     p.rect_filled(rect, 0.0, t.header_bg);
@@ -69,7 +69,7 @@ pub fn show(app: &mut FilmcraftApp, ui: &mut egui::Ui, rect: Rect) {
     let title = if app.session.is_dirty() { tlf!("{name} - Edited", name = app.session.project.name) } else { app.session.project.name.clone() };
     // Right cluster: icons at ~38 pt pitch, then workspace name in caps.
     let mut rx = rect.max.x - 14.0;
-    let mut btn = |ui: &mut egui::Ui, icon: Icon, id: &str, tip: &str, app: &mut FilmcraftApp| -> egui::Response {
+    let mut btn = |ui: &mut egui::Ui, icon: Icon, id: &str, tip: &str, app: &mut EvoFilmApp| -> egui::Response {
         let r = Rect::from_center_size(pos2(rx - 14.0, rect.center().y), vec2(28.0, 28.0));
         rx -= 38.0;
         let resp = ui.interact(r, egui::Id::new(("hdr", id)), Sense::click()).on_hover_text(tip);
@@ -120,7 +120,7 @@ pub fn show(app: &mut FilmcraftApp, ui: &mut egui::Ui, rect: Rect) {
     let wresp = ui.interact(wr, egui::Id::new("hdr-ws-name"), Sense::click());
     app.auto.add("header.workspaceName", wr, &ws);
     p.galley_with_override_text_color(pos2(wr.min.x + 4.0, rect.center().y - wg.size().y / 2.0), wg, if wresp.hovered() { t.text } else { t.text_dim });
-    // Evora fork (patch E1): no community button here (it opened the ArtCraft Discord, a trademark a
+    // Evora fork (patch E1): no community button here (it opened the Upstream Discord, a trademark a
     // modified version must remove, docs/brand/LICENSE-brand.txt). The title uses the gap up to the
     // workspace name.
     {

@@ -1,6 +1,6 @@
 //! FCPXML (1.9–1.11) import/export.
 //!
-//! Mapping between FilmCraft's track model and FCPXML's magnetic model:
+//! Mapping between EvoFilm's track model and FCPXML's magnetic model:
 //! - V1 is the primary storyline (`spine`): clips, `gap`s and `transition`s.
 //! - Other video tracks become connected clips with `lane = track index` (V2 → lane 1); audio-only
 //!   items on audio track n become connected clips on lane `-n`. A V1/V2… clip whose linked audio
@@ -16,13 +16,13 @@
 
 use std::collections::{HashMap, HashSet};
 
-use filmcraft_geom::Vec2;
-use filmcraft_media::MediaKind;
-use filmcraft_project::{
+use evofilm_geom::Vec2;
+use evofilm_media::MediaKind;
+use evofilm_project::{
     BinId, ItemId, ItemKind, Keyframe, Label, Marker, MarkerId, MarkerKind, Param, ParamValue, Project, Sequence, TrackItem, TrackKind, Transition,
     TransitionAlign, TransitionId, effect::find_effect_by_name,
 };
-use filmcraft_time::{FrameRate, TICKS_PER_SECOND, Tick};
+use evofilm_time::{FrameRate, TICKS_PER_SECOND, Tick};
 use roxmltree::Node;
 
 use crate::common::{
@@ -324,7 +324,7 @@ impl<'a, 'i> Imp<'a, 'i, '_> {
     /// (`timeline = origin + offset`). `lane` is the storyline's lane (0 = primary).
     fn storyline(&mut self, seq: &mut Sequence, ctx: &Ctx, spine: Node<'a, 'i>, origin: Tick, lane: i32, primary: bool) {
         // (timeline start, timeline end, video clip on this storyline's track)
-        let mut laid: Vec<(Tick, Tick, Option<filmcraft_project::ClipId>)> = Vec::new();
+        let mut laid: Vec<(Tick, Tick, Option<evofilm_project::ClipId>)> = Vec::new();
         let mut transitions: Vec<(usize, Node)> = Vec::new();
         for el in elements(spine) {
             let tag = el.tag_name().name();
@@ -380,12 +380,12 @@ impl<'a, 'i> Imp<'a, 'i, '_> {
     }
 
     /// Lay out one storyline element at timeline time `t0`. Returns (timeline end, video clip).
-    fn element(&mut self, seq: &mut Sequence, ctx: &Ctx, el: Node<'a, 'i>, t0: Tick, lane: i32, primary: bool) -> (Tick, Option<filmcraft_project::ClipId>) {
+    fn element(&mut self, seq: &mut Sequence, ctx: &Ctx, el: Node<'a, 'i>, t0: Tick, lane: i32, primary: bool) -> (Tick, Option<evofilm_project::ClipId>) {
         let tag = el.tag_name().name();
         let dur = attr_time(el, "duration").unwrap_or(Tick::ZERO);
         let local_start = attr_time(el, "start").unwrap_or(Tick::ZERO);
         let mut vclip = None;
-        let mut placed: Vec<(TrackKind, filmcraft_project::ClipId)> = Vec::new();
+        let mut placed: Vec<(TrackKind, evofilm_project::ClipId)> = Vec::new();
         let name = el.attribute("name").unwrap_or("Clip").to_string();
         // Media and source in.
         let media: Option<(ItemId, Tick, bool, bool)> = match tag {
@@ -591,7 +591,7 @@ impl<'a, 'i> Imp<'a, 'i, '_> {
                 let (Some(t), Some(v)) = (attr_time(k, "time"), k.attribute("value")) else { continue };
                 let mut kf = Keyframe::new(kt(t), map(v));
                 if k.attribute("interp") == Some("hold") {
-                    kf.interp = filmcraft_project::Interpolation::Hold;
+                    kf.interp = evofilm_project::Interpolation::Hold;
                 }
                 p.keyframes.push(kf);
             }
@@ -786,7 +786,7 @@ impl Exp<'_, '_> {
         }
         let id = self.rid();
         self.res_out.push(format!(
-            "    <effect id=\"{id}\" name=\"{}\" uid=\"filmcraft.{}\"/>\n",
+            "    <effect id=\"{id}\" name=\"{}\" uid=\"evofilm.{}\"/>\n",
             crate::xml::escape_attr(name),
             crate::xml::escape_attr(id_hint)
         ));
@@ -808,7 +808,7 @@ impl Exp<'_, '_> {
             audio_rate_str(seq.settings.sample_rate)
         );
         // Which audio items merge into video clips (same index track, linked, identical timing).
-        let mut merged: HashMap<filmcraft_project::ClipId, filmcraft_project::ClipId> = HashMap::new();
+        let mut merged: HashMap<evofilm_project::ClipId, evofilm_project::ClipId> = HashMap::new();
         for (vi, vt) in seq.video_tracks.iter().enumerate() {
             let Some(at) = seq.audio_tracks.get(vi) else { continue };
             for v in &vt.items {
@@ -1074,7 +1074,7 @@ impl Exp<'_, '_> {
                 }
                 s.push_str(&format!("</{tag}>"));
             }
-            self.report.info(format!("effect \"{n}\" written as an FCPXML filter reference (FilmCraft-specific)"));
+            self.report.info(format!("effect \"{n}\" written as an FCPXML filter reference (EvoFilm-specific)"));
             children.push(s);
         }
         if !primary || kind == TrackKind::Audio {
@@ -1135,7 +1135,7 @@ impl Exp<'_, '_> {
                 if p.is_animated() {
                     let mut s = format!("  <param name=\"{attr}\">\n    <keyframeAnimation>\n");
                     for k in &p.keyframes {
-                        let interp = if k.interp == filmcraft_project::Interpolation::Hold { " interp=\"hold\"" } else { "" };
+                        let interp = if k.interp == evofilm_project::Interpolation::Hold { " interp=\"hold\"" } else { "" };
                         s.push_str(&format!("      <keyframe time=\"{}\" value=\"{}\"{interp}/>\n", fmt_time(to_local(k.time), rate), f(&k.value)));
                     }
                     s.push_str("    </keyframeAnimation>\n  </param>");
@@ -1173,7 +1173,7 @@ fn kparam_xml(
     if p.is_animated() {
         let mut s = format!("  <param name=\"{name}\">\n    <keyframeAnimation>\n");
         for k in &p.keyframes {
-            let interp = if k.interp == filmcraft_project::Interpolation::Hold { " interp=\"hold\"" } else { "" };
+            let interp = if k.interp == evofilm_project::Interpolation::Hold { " interp=\"hold\"" } else { "" };
             s.push_str(&format!("      <keyframe time=\"{}\" value=\"{}\"{interp}/>\n", fmt_time(to_local(k.time), rate), f(&k.value)));
         }
         s.push_str("    </keyframeAnimation>\n  </param>");

@@ -4,7 +4,7 @@ Corte est basé sur FilmCraft par l'équipe ArtCraft.
 Corte is based on FilmCraft by the ArtCraft team.
 
 Source amont / upstream source : https://github.com/storytold/filmcraft
-Fork Evora : https://github.com/tazerty/filmcraft (branche evora/<tag amont>)
+Fork Evora : https://github.com/tazerty/evofilm (branche evora/<tag amont>)
 
 Ce build est une version modifiée. Conformément à docs/brand/LICENSE-brand.txt de l'amont, il ne
 porte ni le nom, ni le logo-texte, ni le symbole ArtCraft, et ne se présente pas comme un produit

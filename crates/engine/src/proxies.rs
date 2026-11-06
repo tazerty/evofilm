@@ -15,10 +15,10 @@
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 
-use filmcraft_export::{ExportSettings, Format, Progress, Report};
-use filmcraft_media::{MediaKind, SharedSource};
-use filmcraft_project::{IngestAction, ItemId, ItemKind, MediaClip, MediaRef, Project, SequenceSettings, TrackKind};
-use filmcraft_time::{Tick, TimeRange};
+use evofilm_export::{ExportSettings, Format, Progress, Report};
+use evofilm_media::{MediaKind, SharedSource};
+use evofilm_project::{IngestAction, ItemId, ItemKind, MediaClip, MediaRef, Project, SequenceSettings, TrackKind};
+use evofilm_time::{Tick, TimeRange};
 use serde::Serialize;
 use serde_json::{Value, json};
 
@@ -125,7 +125,7 @@ fn transcode_with_file(
     let mut c = clip.clone();
     c.offline = false;
     c.proxy = None;
-    let item = p.add_item(name, filmcraft_project::Label::Iris, ItemKind::Media(c), None);
+    let item = p.add_item(name, evofilm_project::Label::Iris, ItemKind::Media(c), None);
     let has_v = info.video.is_some();
     let has_a = info.has_audio();
     let seq = p.new_sequence("transcode", st, usize::from(has_v), usize::from(has_a), None);
@@ -158,7 +158,7 @@ fn transcode_with_file(
     };
     let project = Arc::new(p);
     let provider = move |id: ItemId| (id == item).then(|| src.clone());
-    filmcraft_export::export(&project, seq, &settings, &provider, progress).map_err(|e| e.to_string())
+    evofilm_export::export(&project, seq, &settings, &provider, progress).map_err(|e| e.to_string())
 }
 
 /// An output created exclusively while choosing its name. Unless kept after a successful
@@ -315,7 +315,7 @@ fn start_job(s: &mut Session, label: String, work: Vec<(ItemId, ReservedOutput, 
         run();
         poll(s);
     } else {
-        std::thread::Builder::new().name("filmcraft-proxies".into()).spawn(run).map_err(|e| EngineError::Other(e.to_string()))?;
+        std::thread::Builder::new().name("evofilm-proxies".into()).spawn(run).map_err(|e| EngineError::Other(e.to_string()))?;
     }
     Ok(id)
 }

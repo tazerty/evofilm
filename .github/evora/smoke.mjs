@@ -11,7 +11,7 @@
 //   - origine B  http://localhost:<port B>  sert une page parente qui embarque A dans une iframe
 //     (sandbox="allow-scripts allow-same-origin", comme la coquille Evora).
 // Vérifie : les deux origines diffèrent et la parente ne peut pas lire le document de l'iframe ;
-// le moteur s'initialise (window.filmcraftLoad.readyMs, canevas non vide) ; aucune exception, erreur
+// le moteur s'initialise (window.evofilmLoad.readyMs, canevas non vide) ; aucune exception, erreur
 // de console ou erreur du journal (CSP comprise) ; mesure le démarrage à froid (profil vierge).
 // Au rendu : libellés de menus dans chaque langue du moteur (émojis E10, termes sensibles E9).
 // Sortie : rapport JSON et capture d'écran dans --out ; code 1 si une vérification échoue.
@@ -177,13 +177,13 @@ const TEMOIN_JS = `(() => {
   let docRef = null, name = "", path = null, dirty = false, ns = null;
   const write = async (rel) => { try { const parts = rel.split("/"); let d = await navigator.storage.getDirectory(); for (const s of parts.slice(0, -1)) d = await d.getDirectoryHandle(s, { create: true }); const f = await d.getFileHandle(parts.at(-1), { create: true }); const w = await f.createWritable(); await w.write("temoin"); await w.close(); } catch (e) {} };
   const post = (type, payload, re) => { const m = { v: 1, type, id: ulid(), payload }; if (re) m.re = re; parent.postMessage(m, "*"); return m.id; };
-  const save = (re) => { dirty = false; const bytes = new TextEncoder().encode('{"format":"filmcraft.project"}').buffer; post("evora:save", { docRef, name: name + ".fcproj", saveAs: false, bytes }, re); post("evora:dirty", { dirty: false, docRef }); };
-  window.filmcraftLoad = { readyMs: 1 };
-  window.filmcraft = {
+  const save = (re) => { dirty = false; const bytes = new TextEncoder().encode('{"format":"evofilm.project"}').buffer; post("evora:save", { docRef, name: name + ".evofilm", saveAs: false, bytes }, re); post("evora:dirty", { dirty: false, docRef }); };
+  window.evofilmLoad = { readyMs: 1 };
+  window.evofilm = {
     execute: async (cmd, p = {}) => {
       if (cmd === "prefs.get") return prefs[p.key];
       if (cmd === "project.inspect") return { name, path, dirty };
-      if (cmd === "file.newSequence") { dirty = true; post("evora:dirty", { dirty: true, docRef }); if (ns) await write("evora-corte/" + ns + "/recovery/snapshot.fcproj"); return {}; }
+      if (cmd === "file.newSequence") { dirty = true; post("evora:dirty", { dirty: true, docRef }); if (ns) await write("evora-corte/" + ns + "/recovery/snapshot.evofilm"); return {}; }
       if (cmd === "file.saveCopy") { const to = String(p.path || ""); const rel = to.startsWith("/opfs/") ? to.slice(6) : to; await write(rel); if (ns) await write("evora-corte/" + ns + "/" + rel); return {}; }
       if (cmd === "file.save") { save(); return {}; }
       return {};
@@ -204,7 +204,7 @@ const TEMOIN_JS = `(() => {
         post("evora:ack", ok ? { ok: true } : { ok: false, code: "busy" }, d.id);
       })();
     }
-    else if (d.type === "evora:open") { docRef = p.docRef; name = String(p.name || "").replace(/\\.fcproj$/, ""); path = "/evora/" + docRef + "/" + p.name; dirty = false; post("evora:ack", { ok: true }, d.id); post("evora:dirty", { dirty: false, docRef }); }
+    else if (d.type === "evora:open") { docRef = p.docRef; name = String(p.name || "").replace(/\\.evofilm$/, ""); path = "/evora/" + docRef + "/" + p.name; dirty = false; post("evora:ack", { ok: true }, d.id); post("evora:dirty", { dirty: false, docRef }); }
     else if (d.type === "evora:request-save") requestAnimationFrame(() => { if (dirty) save(d.id); else post("evora:ack", { ok: true, code: "clean" }, d.id); });
     else if (d.type === "evora:lang") { prefs["general.interfaceLanguage"] = p.engineLang || "en"; post("evora:ack", { ok: true }, d.id); }
     else if (d.type === "evora:theme") { prefs["appearance.appearanceMode"] = p.theme; post("evora:ack", { ok: true }, d.id); }
@@ -628,7 +628,7 @@ try {
   while (Date.now() < deadline) {
     try {
       load = await inChild(
-        "(() => { const l = window.filmcraftLoad || {}; return { readyMs: l.readyMs ?? null, wasmMs: l.wasmMs ?? null, error: l.error ?? null, fatal: l.fatal ?? null, search: location.search, origin: location.origin }; })()",
+        "(() => { const l = window.evofilmLoad || {}; return { readyMs: l.readyMs ?? null, wasmMs: l.wasmMs ?? null, error: l.error ?? null, fatal: l.fatal ?? null, search: location.search, origin: location.origin }; })()",
       );
       if (load.readyMs || load.error || load.fatal) break;
     } catch {
@@ -644,7 +644,7 @@ try {
   if (load?.error) fail(`erreur de démarrage : ${load.error}`);
   await sleep(3000); // laisse passer les premières images (paniques tardives)
 
-  const finalLoad = await inChild("(() => { const l = window.filmcraftLoad || {}; return { fatal: l.fatal ?? null, readyMs: l.readyMs ?? null }; })()").catch((e) => ({ fatal: String(e) }));
+  const finalLoad = await inChild("(() => { const l = window.evofilmLoad || {}; return { fatal: l.fatal ?? null, readyMs: l.readyMs ?? null }; })()").catch((e) => ({ fatal: String(e) }));
   if (finalLoad.fatal) fail(`arrêt fatal après démarrage : ${finalLoad.fatal}`);
 
   // prémisse : origines distinctes, cloisonnement effectif
@@ -665,11 +665,11 @@ try {
 
   // canevas
   const canvas = await inChild(
-    "(() => { const c = document.getElementById('filmcraft_canvas'); return c ? { width: c.width, height: c.height, cssWidth: c.clientWidth, cssHeight: c.clientHeight } : null; })()",
+    "(() => { const c = document.getElementById('evofilm_canvas'); return c ? { width: c.width, height: c.height, cssWidth: c.clientWidth, cssHeight: c.clientHeight } : null; })()",
   );
   report.checks.canvas = canvas;
   if (!canvas || !(canvas.width > 0 && canvas.height > 0)) fail(`canevas absent ou vide : ${JSON.stringify(canvas)}`);
-  report.info = await inChild("(typeof filmcraft === 'object' && filmcraft.info) ? filmcraft.info() : null").catch((e) => String(e));
+  report.info = await inChild("(typeof evofilm === 'object' && evofilm.info) ? evofilm.info() : null").catch((e) => String(e));
 
   // au rendu : libellés de menus, langue par langue (E10 émojis, E9 termes sensibles)
   const isEmoji = (c) => {
@@ -684,22 +684,22 @@ try {
   // de l'app (Q10) : aucun libellé affiché ne nomme plus l'amont (casse respectée)
   const TERMS = ["Lumetri", "Lightroom", "Acrobat", "Premiere", "Adobe", "Cycore", "Essential Graphics", "Essential Sound", "Warp Stabilizer", "Ultra Key", "Morph Cut",
     "Media Composer", "Final Cut Pro Compatible"];
-  const UPSTREAM_NAME = "FilmCraft";
+  const UPSTREAM_NAME = "EvoFilm";
   const termHits = (labels) =>
     labels.flatMap((l) => [...TERMS.filter((t) => new RegExp(`(?<!\\p{L})${t}(?!\\p{L})`, "iu").test(l)), ...(l.includes(UPSTREAM_NAME) ? [UPSTREAM_NAME] : [])].map((t) => `${t}: ${l}`));
   const rendered = { languages: {}, emoji: [], terms: [] };
-  const menu0 = await inChild("filmcraft.request('ui.menu.list')").catch(() => []);
+  const menu0 = await inChild("evofilm.request('ui.menu.list')").catch(() => []);
   // COR-FK-B2 : le menu hors coquille, prémisse des fonctions masquées en mode hôte (MENUS-MASKED)
   report.menuIdsOutside = (Array.isArray(menu0) ? menu0 : []).map((m) => m.id);
   const langCmds = (Array.isArray(menu0) ? menu0 : []).map((m) => m.id).filter((id) => id.startsWith("app.language."));
   for (const cmd of langCmds) {
-    const switched = await inChild(`filmcraft.execute(${JSON.stringify(cmd)}).then(() => true, (e) => String(e))`).catch((e) => String(e));
+    const switched = await inChild(`evofilm.execute(${JSON.stringify(cmd)}).then(() => true, (e) => String(e))`).catch((e) => String(e));
     if (switched !== true) {
       rendered.languages[cmd] = { switched };
       continue;
     }
     await sleep(300);
-    const items = await inChild("filmcraft.request('ui.menu.list')").catch(() => []);
+    const items = await inChild("evofilm.request('ui.menu.list')").catch(() => []);
     const labels = (Array.isArray(items) ? items : []).map((m) => m.label);
     rendered.languages[cmd] = { labels: labels.length };
     for (const l of labels) {
@@ -707,7 +707,7 @@ try {
       for (const h of termHits([l])) rendered.terms.push(`${cmd}: ${h}`);
     }
   }
-  if (langCmds.includes("app.language.english")) await inChild("filmcraft.execute('app.language.english')").catch(() => {});
+  if (langCmds.includes("app.language.english")) await inChild("evofilm.execute('app.language.english')").catch(() => {});
   report.rendered = rendered;
 
   // E7 : les liens vers l'extérieur ne s'ouvrent pas (aucune fenêtre, aucune navigation, aucune
@@ -716,7 +716,7 @@ try {
   const urlBefore = await inChild("location.href");
   const links = {};
   for (const cmd of ["help.github", "help.reportIssue"]) {
-    links[cmd] = await inChild(`filmcraft.execute(${JSON.stringify(cmd)}).then((r) => r && r.url ? r.url : r, (e) => "erreur : " + e)`).catch((e) => String(e));
+    links[cmd] = await inChild(`evofilm.execute(${JSON.stringify(cmd)}).then((r) => r && r.url ? r.url : r, (e) => "erreur : " + e)`).catch((e) => String(e));
   }
   await sleep(1000);
   const pagesAfter = (await cdp.send("Target.getTargets")).targetInfos.filter((t) => t.type === "page").length;
@@ -738,7 +738,7 @@ try {
     const until = Date.now() + 90000;
     while (Date.now() < until) {
       try {
-        const l = await inChild("(() => { const l = window.filmcraftLoad || {}; return { readyMs: l.readyMs ?? null, error: l.error ?? null, search: location.search, path: location.pathname, old: !!window.__smokeAncien }; })()");
+        const l = await inChild("(() => { const l = window.evofilmLoad || {}; return { readyMs: l.readyMs ?? null, error: l.error ?? null, search: location.search, path: location.pathname, old: !!window.__smokeAncien }; })()");
         if (!l.old && l.path === path && l.search.startsWith("?" + query) && (l.readyMs || l.error)) {
           if (l.readyMs) markReady();
           return l;
@@ -774,8 +774,8 @@ try {
         continue;
       }
       await sleep(500);
-      const info = await inChild("filmcraft.info()").catch(() => null);
-      const items = await inChild("filmcraft.request('ui.menu.list')").catch(() => []);
+      const info = await inChild("evofilm.info()").catch(() => null);
+      const items = await inChild("evofilm.request('ui.menu.list')").catch(() => []);
       const label = (Array.isArray(items) ? items : []).find((m) => m.id === "file.saveAs")?.label ?? null;
       report.lang[tag] = { applied: info?.language?.applied ?? null, saveAs: label, readyMs: l.readyMs };
       if (info?.language?.applied !== code) fail(`E3 ${tag} : langue appliquée ${info?.language?.applied ?? "?"}, attendu ${code}`);
@@ -788,8 +788,8 @@ try {
     report.theme = {};
     for (const [query, mode, light] of [["empty", "dark", false], ["empty&theme=light", "light", true]]) {
       const l = await reload(query);
-      const accent = await inChild(`filmcraft.execute("prefs.get", {key: "appearance.highlightColor"})`).catch((e) => String(e));
-      const appearance = await inChild(`filmcraft.execute("prefs.get", {key: "appearance.appearanceMode"})`).catch((e) => String(e));
+      const accent = await inChild(`evofilm.execute("prefs.get", {key: "appearance.highlightColor"})`).catch((e) => String(e));
+      const appearance = await inChild(`evofilm.execute("prefs.get", {key: "appearance.appearanceMode"})`).catch((e) => String(e));
       const page = await inChild("({ light: document.documentElement.classList.contains('light'), background: getComputedStyle(document.body).backgroundColor })").catch(() => null);
       report.theme[query] = { ready: !!l?.readyMs, accent, appearance, page };
       if (String(accent).toLowerCase() !== "#4f46e5") fail(`E2 ${query} : accent ${JSON.stringify(accent)}, attendu #4f46e5`);
@@ -801,7 +801,7 @@ try {
   // E5 (correctif) : l'URL ne nomme plus l'espace de noms de stockage. Sans ?host=evora, le
   // comportement amont est inchangé (racine OPFS) et ?ns= est sans effet ; avec ?host=evora, rien
   // n'est écrit tant qu'evora:init n'a pas nommé l'espace (échec fermé, même projet modifié) ; la
-  // purge n'a plus d'entrée JavaScript (filmcraft.purgeStorage retiré).
+  // purge n'a plus d'entrée JavaScript (evofilm.purgeStorage retiré).
   if (storageChecks) {
     const clearRoot =
       "(async () => { const r = await navigator.storage.getDirectory(); for await (const [n] of r.entries()) await r.removeEntry(n, { recursive: true }); return true; })()";
@@ -815,35 +815,35 @@ try {
       }
       return r;
     };
-    const edit = (name) => inChild(`filmcraft.execute("file.newSequence", {name: ${JSON.stringify(name)}}).then(() => true, (e) => String(e))`).catch((e) => String(e));
+    const edit = (name) => inChild(`evofilm.execute("file.newSequence", {name: ${JSON.stringify(name)}}).then(() => true, (e) => String(e))`).catch((e) => String(e));
     report.storageE5 = {};
     // 1. ?ns= ignoré : la récupération s'écrit à la racine, comme l'amont, sans dossier d'espace
     report.storageE5.cleared = await clearRootRetry();
     let l = await reload("empty&norecover&ns=evoraTestNsA1");
-    const infoNs = await inChild("filmcraft.info()").catch(() => null);
+    const infoNs = await inChild("evofilm.info()").catch(() => null);
     report.storageE5.ns = { ready: !!l?.readyMs, storage: infoNs?.storage, opfs: infoNs?.opfs, edit: await edit("E5-ns") };
     let rootNs = [];
     for (let i = 0; i < 40; i++) {
       rootNs = await inChild(LIST_ALL).catch(() => []);
-      if (Array.isArray(rootNs) && rootNs.includes("recovery/meta.json") && rootNs.includes("recovery/snapshot.fcproj")) break;
+      if (Array.isArray(rootNs) && rootNs.includes("recovery/meta.json") && rootNs.includes("recovery/snapshot.evofilm")) break;
       await sleep(500);
     }
     await sleep(1000); // l'écriture de l'instantané se termine
     report.storageE5.ns.root = rootNs;
     if (report.storageE5.cleared !== true) fail(`E5 : la racine OPFS n'a pas pu être vidée avant la mesure (${JSON.stringify(report.storageE5.cleared)})`);
     if (!l?.readyMs || infoNs?.storage !== "root") fail(`E5 : sans ?host=evora le stockage doit rester celui de l'amont (${JSON.stringify(report.storageE5.ns)})`);
-    if (!(Array.isArray(rootNs) && rootNs.includes("recovery/snapshot.fcproj"))) fail(`E5 : aucune écriture de récupération à la racine sans ?host=evora (${JSON.stringify(rootNs)})`);
+    if (!(Array.isArray(rootNs) && rootNs.includes("recovery/snapshot.evofilm"))) fail(`E5 : aucune écriture de récupération à la racine sans ?host=evora (${JSON.stringify(rootNs)})`);
     if (Array.isArray(rootNs) && rootNs.some((n) => n.startsWith("ns-") || n.startsWith("evora-corte"))) fail(`E5 : ?ns= a encore un effet (${JSON.stringify(rootNs)})`);
-    report.storageE5.purgeApi = await inChild("typeof filmcraft.purgeStorage").catch((e) => String(e));
-    if (report.storageE5.purgeApi !== "undefined") fail(`E5 : filmcraft.purgeStorage existe encore (${report.storageE5.purgeApi})`);
+    report.storageE5.purgeApi = await inChild("typeof evofilm.purgeStorage").catch((e) => String(e));
+    if (report.storageE5.purgeApi !== "undefined") fail(`E5 : evofilm.purgeStorage existe encore (${report.storageE5.purgeApi})`);
     // 2. ?host=evora sans evora:init : OPFS fermé, rien au démarrage ni avec un projet modifié
     report.storageE5.cleared2 = await clearRootRetry();
     if (report.storageE5.cleared2 !== true) fail(`E5 : la racine OPFS n'a pas pu être vidée avant la mesure (${JSON.stringify(report.storageE5.cleared2)})`);
     l = await reload("empty&host=evora");
-    const infoHost = await inChild("filmcraft.info()").catch(() => null);
+    const infoHost = await inChild("evofilm.info()").catch(() => null);
     report.storageE5.host = { ready: !!l?.readyMs, storage: infoHost?.storage, opfs: infoHost?.opfs, atStart: await inChild(LIST_ALL).catch((e) => String(e)), edit: await edit("E5-host") };
     await sleep(7000); // plus que l'intervalle de l'instantané de récupération (5 s)
-    const dirty = await inChild("filmcraft.execute('project.inspect').then((p) => p.dirty, (e) => String(e))").catch((e) => String(e));
+    const dirty = await inChild("evofilm.execute('project.inspect').then((p) => p.dirty, (e) => String(e))").catch((e) => String(e));
     report.storageE5.host.dirty = dirty;
     report.storageE5.host.root = await inChild(LIST_ALL).catch((e) => String(e));
     if (!l?.readyMs || infoHost?.storage !== "closed" || infoHost?.opfs !== false) fail(`E5 : avec ?host=evora, OPFS doit rester fermé avant evora:init (${JSON.stringify(report.storageE5.host)})`);
@@ -892,7 +892,7 @@ try {
     const SEED = (paths) =>
       `(async () => { const r = await navigator.storage.getDirectory(); for (const p of ${JSON.stringify(paths)}) { const parts = p.split('/'); let d = r; for (const s of parts.slice(0, -1)) d = await d.getDirectoryHandle(s, { create: true }); const f = await d.getFileHandle(parts.at(-1), { create: true }); const w = await f.createWritable(); await w.write('graine'); await w.close(); } return true; })()`;
     const list = () => inChild(LIST_ALL).catch((e) => String(e));
-    const exec = (cmd, params = {}) => inChild(`filmcraft.execute(${JSON.stringify(cmd)}, ${JSON.stringify(params)}).then((r) => r === undefined ? null : r, (e) => "erreur : " + e)`).catch((e) => "erreur : " + e);
+    const exec = (cmd, params = {}) => inChild(`evofilm.execute(${JSON.stringify(cmd)}, ${JSON.stringify(params)}).then((r) => r === undefined ? null : r, (e) => "erreur : " + e)`).catch((e) => "erreur : " + e);
     // durée pendant laquelle le « second onglet » garde le verrou et son flux ouvert
     const HOLD_MS = 4000;
     const seeds = ["recovery/graine.bin", "media/graine.bin", "evora-lab/graine.bin", `evora-corte/${OTHER}/recovery/meta.json`, `evora-corte/${NS}/recovery/ancien.bin`, "autre-moteur/garder.txt"];
@@ -906,27 +906,27 @@ try {
     await inParent("window.__ehp.clear()");
     let l = await reload("empty&host=evora&muet");
     await sleep(3000);
-    const mute = { ready: !!l?.readyMs, messages: fromEngine(await getLog()).length, ehp: (await inChild("filmcraft.info()").catch(() => null))?.ehp ?? null };
+    const mute = { ready: !!l?.readyMs, messages: fromEngine(await getLog()).length, ehp: (await inChild("evofilm.info()").catch(() => null))?.ehp ?? null };
     report.ehp.mute = mute;
     if (!mute.ready || mute.messages !== 0 || mute.ehp !== "silent") fail(`E4 [EHP-MUET] le pont doit rester muet sans origine admise : ${JSON.stringify(mute)}`);
 
-    // b. Projet de test (.fcproj) produit par le moteur lui-même, hors pont (racine OPFS, comme l'amont)
+    // b. Projet de test (.evofilm) produit par le moteur lui-même, hors pont (racine OPFS, comme l'amont)
     l = await reload("empty&norecover&fixture");
     await exec("file.newProject", { name: "evora-smoke" });
     await exec("file.newSequence", { name: "S1" });
-    await exec("file.saveCopy", { path: "/opfs/evora-lab/evora-smoke.fcproj" });
-    const fixture = await inChild("filmcraft.readFile('/opfs/evora-lab/evora-smoke.fcproj').then((u) => { let s = ''; for (const b of u) s += String.fromCharCode(b); return btoa(s); }, (e) => 'erreur : ' + e)").catch((e) => String(e));
+    await exec("file.saveCopy", { path: "/opfs/evora-lab/evora-smoke.evofilm" });
+    const fixture = await inChild("evofilm.readFile('/opfs/evora-lab/evora-smoke.evofilm').then((u) => { let s = ''; for (const b of u) s += String.fromCharCode(b); return btoa(s); }, (e) => 'erreur : ' + e)").catch((e) => String(e));
     const fixtureBytes = Buffer.from(String(fixture), "base64");
     let fixtureFormat = null;
     try { fixtureFormat = JSON.parse(fixtureBytes.toString("utf-8")).format; } catch {}
     for (let i = 0; i < 40; i++) {
       const all = await list();
-      if (Array.isArray(all) && all.includes("recovery/snapshot.fcproj") && all.includes("recovery/meta.json") && all.includes("evora-lab/evora-smoke.fcproj")) break;
+      if (Array.isArray(all) && all.includes("recovery/snapshot.evofilm") && all.includes("recovery/meta.json") && all.includes("evora-lab/evora-smoke.evofilm")) break;
       await sleep(500);
     }
     await sleep(1000); // les écritures amont en cours se terminent
     report.ehp.fixture = { bytes: fixtureBytes.length, format: fixtureFormat };
-    if (fixtureFormat !== "filmcraft.project") fail(`E4 : projet de test illisible (${String(fixture).slice(0, 120)})`);
+    if (fixtureFormat !== "evofilm.project") fail(`E4 : projet de test illisible (${String(fixture).slice(0, 120)})`);
     // plafond de document calibré sur le projet de test : de quoi l'enregistrer après quelques modifications
     const LIMIT = fixtureBytes.length * 16;
 
@@ -989,11 +989,11 @@ try {
       if (r.prefs.lang !== "fr" || r.prefs.mode !== "dark" || String(r.prefs.accent).toLowerCase() !== "#4f46e5") flag("INIT-PREFS", `préférences : ${JSON.stringify(r.prefs)}`);
       // 4. evora:open d'un projet neuf, puis evora:request-save sans rien à enregistrer
       const R1 = await ulid();
-      const openNew = await send(await msg("evora:open", { docRef: R1, name: "evora-neuf.fcproj", new: true }));
+      const openNew = await send(await msg("evora:open", { docRef: R1, name: "evora-neuf.evofilm", new: true }));
       const openNewAck = await waitFor(answer(openNew, "evora:ack"), 15000);
       const cleanAfterNew = await waitFor((log) => fromEngine(log).find((m) => m.type === "evora:dirty" && m.payload?.docRef === R1 && m.payload?.dirty === false), 5000);
       r.openNew = { ack: openNewAck?.payload ?? null, dirty: !!cleanAfterNew, project: await exec("project.inspect") };
-      if (openNewAck?.payload?.ok !== true || !cleanAfterNew || r.openNew.project?.path !== `/evora/${R1}/evora-neuf.fcproj` || r.openNew.project?.name !== "evora-neuf") {
+      if (openNewAck?.payload?.ok !== true || !cleanAfterNew || r.openNew.project?.path !== `/evora/${R1}/evora-neuf.evofilm` || r.openNew.project?.name !== "evora-neuf") {
         flag("OPEN", `projet neuf : ${JSON.stringify(r.openNew)}`);
       }
       const rsClean = await send(await msg("evora:request-save", { reason: "user" }));
@@ -1001,18 +1001,18 @@ try {
       r.requestSaveClean = rsCleanAck ? { type: rsCleanAck.type, payload: rsCleanAck.payload } : null;
       if (rsCleanAck?.type !== "evora:ack" || rsCleanAck.payload?.ok !== true || rsCleanAck.payload?.code !== "clean") flag("REQUEST-SAVE", `rien à enregistrer : ${JSON.stringify(r.requestSaveClean)}`);
       // 5. plafond (+1 octet) et vue typée à la place d'un ArrayBuffer
-      const tooBig = await send(await msg("evora:open", { docRef: await ulid(), name: "trop-grand.fcproj" }), LIMIT + 1);
+      const tooBig = await send(await msg("evora:open", { docRef: await ulid(), name: "trop-grand.evofilm" }), LIMIT + 1);
       const tooBigAck = await waitFor(answer(tooBig, "evora:ack"), 10000);
       r.tooLarge = tooBigAck?.payload ?? null;
       if (tooBigAck?.payload?.ok !== false || tooBigAck?.payload?.code !== "too_large") flag("PLAFOND", `plafond + 1 octet : ${JSON.stringify(r.tooLarge)}`);
-      const view = await send(await msg("evora:open", { docRef: await ulid(), name: "vue.fcproj" }), "view");
+      const view = await send(await msg("evora:open", { docRef: await ulid(), name: "vue.evofilm" }), "view");
       // 6. evora:open du projet de test en octets transférés
       const R2 = await ulid();
-      const open = await send(await msg("evora:open", { docRef: R2, name: "evora-smoke.fcproj" }), String(fixture));
+      const open = await send(await msg("evora:open", { docRef: R2, name: "evora-smoke.evofilm" }), String(fixture));
       const openAck = await waitFor(answer(open, "evora:ack"), 20000);
       const cleanAfterOpen = await waitFor((log) => fromEngine(log).find((m) => m.type === "evora:dirty" && m.payload?.docRef === R2 && m.payload?.dirty === false), 5000);
       r.open = { ack: openAck?.payload ?? null, dirty: !!cleanAfterOpen, project: await exec("project.inspect") };
-      if (openAck?.payload?.ok !== true || !cleanAfterOpen || r.open.project?.path !== `/evora/${R2}/evora-smoke.fcproj` || r.open.project?.name !== "evora-smoke") {
+      if (openAck?.payload?.ok !== true || !cleanAfterOpen || r.open.project?.path !== `/evora/${R2}/evora-smoke.evofilm` || r.open.project?.name !== "evora-smoke") {
         flag("OPEN", `projet en octets : ${JSON.stringify(r.open)}`);
       }
       // 7. une modification : evora:dirty ; en mode hôte, rien n'est gardé dans le navigateur (E5,
@@ -1025,13 +1025,13 @@ try {
       const afterEdit = await list();
       const added = Array.isArray(afterEdit) && Array.isArray(afterInit) ? afterEdit.filter((p) => !afterInit.includes(p)) : null;
       r.afterEdit = { list: afterEdit, added };
-      if (!added || added.length !== 0 || afterEdit.some((p) => /(^|\/)recovery\/(snapshot\.fcproj|meta\.json)$/.test(p))) {
+      if (!added || added.length !== 0 || afterEdit.some((p) => /(^|\/)recovery\/(snapshot\.evofilm|meta\.json)$/.test(p))) {
         flag("NS-ECRITURE", `écriture dans le navigateur après une modification en mode hôte : ${JSON.stringify(r.afterEdit)}`);
       }
       // storage.ns : ce que le moteur écrit encore dans OPFS (une copie sous /opfs/) va sous l'espace
       // du compte, jamais à la racine
-      const probe = await exec("file.saveCopy", { path: "/opfs/evora-lab/sonde.fcproj" });
-      const PROBE = `evora-corte/${NS}/evora-lab/sonde.fcproj`;
+      const probe = await exec("file.saveCopy", { path: "/opfs/evora-lab/sonde.evofilm" });
+      const PROBE = `evora-corte/${NS}/evora-lab/sonde.evofilm`;
       let afterProbe = [];
       for (let i = 0; i < 20; i++) {
         afterProbe = await list();
@@ -1072,7 +1072,7 @@ try {
       r.save = save ? { type: save.type, keys: save.payloadKeys, payload: save.payload } : null;
       const sp = save?.payload ?? {};
       if (save?.type !== "evora:save" || JSON.stringify(save.payloadKeys) !== JSON.stringify(["docRef", "name", "saveAs", "bytes"]) || sp.docRef !== R2 ||
-        sp.name !== "evora-smoke.fcproj" || sp.saveAs !== false || !(sp.bytes?.arrayBuffer >= 1) || sp.bytes?.format !== "filmcraft.project") {
+        sp.name !== "evora-smoke.evofilm" || sp.saveAs !== false || !(sp.bytes?.arrayBuffer >= 1) || sp.bytes?.format !== "evofilm.project") {
         flag("SAVE", `réponse à evora:request-save : ${JSON.stringify(r.save)}`);
       }
       if (save) await send(await msg("evora:saved", { ok: true, version: 2 }, { re: save.id }));
@@ -1087,7 +1087,7 @@ try {
         return saves.length > savesBefore ? saves.at(-1) : null;
       }, 10000);
       r.ownSave = ownSave ? { hasRe: ownSave.hasRe, payload: ownSave.payload } : null;
-      if (!ownSave || ownSave.hasRe || ownSave.payload?.docRef !== R2 || ownSave.payload?.bytes?.format !== "filmcraft.project") flag("SAVE", `enregistrement demandé dans le moteur : ${JSON.stringify(r.ownSave)}`);
+      if (!ownSave || ownSave.hasRe || ownSave.payload?.docRef !== R2 || ownSave.payload?.bytes?.format !== "evofilm.project") flag("SAVE", `enregistrement demandé dans le moteur : ${JSON.stringify(r.ownSave)}`);
       if (ownSave) await send(await msg("evora:saved", { ok: false, error: "conflict" }, { re: ownSave.id }));
       // 10. live.theme et live.lang
       const th = await send(await msg("evora:theme", { theme: "light", accent: "#4F46E5" }));
@@ -1095,7 +1095,7 @@ try {
       const la = await send(await msg("evora:lang", { lang: "es", engineLang: "es" }));
       const laAck = await waitFor(answer(la, "evora:ack"), 10000);
       await sleep(500);
-      const items = await inChild("filmcraft.request('ui.menu.list')").catch(() => []);
+      const items = await inChild("evofilm.request('ui.menu.list')").catch(() => []);
       r.live = { theme: thAck?.payload ?? null, mode: await exec("prefs.get", { key: "appearance.appearanceMode" }), lang: laAck?.payload ?? null,
         language: await exec("prefs.get", { key: "general.interfaceLanguage" }), saveAs: (Array.isArray(items) ? items : []).find((m) => m.id === "file.saveAs")?.label ?? null };
       if (thAck?.payload?.ok !== true || r.live.mode !== "light") flag("THEME", `evora:theme : ${JSON.stringify(r.live)}`);
@@ -1112,7 +1112,7 @@ try {
       await inParent("window.__ehp.hide(false)");
       r.hidden = { dirty: !!dirtyHidden, answer: saveHidden ? { type: saveHidden.type, payload: saveHidden.payload } : null };
       if (!dirtyHidden) flag("PREMISSE", `aucune modification avant le masquage : ${JSON.stringify(r.hidden)}`);
-      else if (saveHidden?.type !== "evora:save" || saveHidden.payload?.docRef !== R2 || saveHidden.payload?.bytes?.format !== "filmcraft.project") {
+      else if (saveHidden?.type !== "evora:save" || saveHidden.payload?.docRef !== R2 || saveHidden.payload?.bytes?.format !== "evofilm.project") {
         flag("MASQUE", `réponse à evora:request-save, iframe masquée : ${JSON.stringify(r.hidden)}`);
       }
       if (saveHidden?.type === "evora:save") await send(await msg("evora:saved", { ok: true, version: 3 }, { re: saveHidden.id }));
@@ -1123,14 +1123,14 @@ try {
       const pgAck = await waitFor(answer(pg, "evora:ack"), 20000);
       const atAck = await list();
       // après l'accusé, une écriture du moteur (copie sous /opfs/) n'atteint plus le stockage
-      const afterPurgeWrite = await exec("file.saveCopy", { path: "/opfs/evora-lab/apres-purge.fcproj" });
+      const afterPurgeWrite = await exec("file.saveCopy", { path: "/opfs/evora-lab/apres-purge.evofilm" });
       for (let i = 0; i < 4; i++) {
         await exec("file.newSequence", { name: `E4-apres-${i}` });
         await sleep(2000);
       }
       const later = await list();
       const web = await inChild("(async () => ({ localStorage: Object.keys(localStorage), indexedDB: indexedDB.databases ? (await indexedDB.databases()).map((d) => d.name) : 'n/a' }))()").catch((e) => String(e));
-      r.purge = { ack: pgAck?.payload ?? null, atAck, afterPurgeWrite, later, web, storage: (await inChild("filmcraft.info()").catch(() => null))?.storage ?? null };
+      r.purge = { ack: pgAck?.payload ?? null, atAck, afterPurgeWrite, later, web, storage: (await inChild("evofilm.info()").catch(() => null))?.storage ?? null };
       const engineLeft = (all) => !Array.isArray(all) || all.some((p) => (p.startsWith("evora-corte/") && p !== "evora-corte/") || ["recovery/", "media/", "evora-lab/"].includes(p));
       if (pgAck?.payload?.ok !== true) flag("PURGE", `accusé d'evora:purge absent ou négatif : ${JSON.stringify(pgAck)}`);
       if (engineLeft(atAck)) flag("PURGE", `stockage du moteur encore présent à l'accusé : ${JSON.stringify(atAck)}`);
@@ -1179,8 +1179,8 @@ try {
       const init2 = await send(await msg("evora:init", initPayload, { re: ready2.id }));
       const init2Ack = await waitFor(answer(init2, "evora:ack"), 30000);
       if (init2Ack?.payload?.ok !== true) flag("INIT", `second chargement, accusé d'evora:init : ${JSON.stringify(init2Ack)}`);
-      const SONDE = `evora-corte/${NS}/evora-lab/sonde-1.fcproj`;
-      await exec("file.saveCopy", { path: "/opfs/evora-lab/sonde-1.fcproj" });
+      const SONDE = `evora-corte/${NS}/evora-lab/sonde-1.evofilm`;
+      await exec("file.saveCopy", { path: "/opfs/evora-lab/sonde-1.evofilm" });
       let beforeRemoval = [];
       for (let i = 0; i < 20; i++) {
         beforeRemoval = await list();
@@ -1189,16 +1189,16 @@ try {
       }
       // l'« autre onglet » purge comme le moteur : sous son verrou (il attend la fin d'une écriture)
       const removed = await inChild(`navigator.locks.request("evora-corte-opfs", { mode: "exclusive" }, async () => { const e = await (await navigator.storage.getDirectory()).getDirectoryHandle("evora-corte"); await e.removeEntry(${JSON.stringify(NS)}, { recursive: true }); return true; })`).catch((e) => String(e));
-      const removalWrite = await exec("file.saveCopy", { path: "/opfs/evora-lab/sonde-2.fcproj" });
+      const removalWrite = await exec("file.saveCopy", { path: "/opfs/evora-lab/sonde-2.evofilm" });
       await sleep(2000);
       const afterRemoval = await list();
-      const storage2 = (await inChild("filmcraft.info()").catch(() => null))?.storage ?? null;
+      const storage2 = (await inChild("evofilm.info()").catch(() => null))?.storage ?? null;
       r.recreation = { before: beforeRemoval, removed, write: removalWrite, after: afterRemoval, storage: storage2 };
       if (!Array.isArray(beforeRemoval) || !beforeRemoval.includes(SONDE) || removed !== true) flag("PREMISSE", `espace du compte avant l'effacement : ${JSON.stringify(r.recreation)}`);
       if (!Array.isArray(afterRemoval) || afterRemoval.some((p) => p.startsWith(`evora-corte/${NS}/`)) || storage2 !== "closed") {
         flag("RECREATION", `espace recréé après son effacement par un autre onglet : ${JSON.stringify(r.recreation)}`);
       }
-      // 15. panique provoquée (injection de faute amont, FilmcraftApp::panic_next_frame) : le moteur
+      // 15. panique provoquée (injection de faute amont, EvoFilmApp::panic_next_frame) : le moteur
       //     s'arrête ; evora:failed {code: "panic"} une seule fois, et aucun texte du moteur à l'écran
       //     (la coquille affiche son propre message, §4.4)
       if (mode !== "oopif") {
@@ -1206,9 +1206,9 @@ try {
         return { bad, r };
       }
       const failedOf = (log) => fromEngine(log).filter((m) => m.type === "evora:failed");
-      const screenOf = () => inChild("(() => { const f = document.getElementById('fatal'); return { fatal: !!(window.filmcraftLoad && window.filmcraftLoad.fatal), shown: !!(f && f.classList.contains('on')), text: f ? f.innerText.trim() : null }; })()").catch((e) => String(e));
+      const screenOf = () => inChild("(() => { const f = document.getElementById('fatal'); return { fatal: !!(window.evofilmLoad && window.evofilmLoad.fatal), shown: !!(f && f.classList.contains('on')), text: f ? f.innerText.trim() : null }; })()").catch((e) => String(e));
       crashAt.set(sessions.get(childSession).gen, events.length);
-      const injected = await inChild("typeof filmcraft.injectPanic === 'function' ? (filmcraft.injectPanic(), true) : 'absent'").catch((e) => String(e));
+      const injected = await inChild("typeof evofilm.injectPanic === 'function' ? (evofilm.injectPanic(), true) : 'absent'").catch((e) => String(e));
       await waitFor((log) => failedOf(log).length > 0, 15000);
       await sleep(2000);
       const panicFailed = failedOf(await getLog());
@@ -1274,7 +1274,7 @@ try {
       const MEDIA_PATHS = ["/files/clip-a.wav", "/files/clip-b.wav", "/files/clip-c.wav"];
       const sortedKeys = (m) => JSON.stringify([...(m?.payloadKeys ?? [])].sort());
       const inspect = () => exec("project.inspect");
-      const invoke = (id) => inChild(`filmcraft.request("ui.menu.invoke", { id: ${JSON.stringify(id)} }).then(() => true, (e) => "erreur : " + e.message)`).catch((e) => String(e));
+      const invoke = (id) => inChild(`evofilm.request("ui.menu.invoke", { id: ${JSON.stringify(id)} }).then(() => true, (e) => "erreur : " + e.message)`).catch((e) => String(e));
       const ofType = (log, type) => fromEngine(log).filter((m) => m.type === type);
       const count = async (type) => ofType(await getLog(), type).length;
       const next = (type, n, ms) => waitFor((log) => { const l = ofType(log, type); return l.length > n ? l.at(-1) : null; }, ms);
@@ -1328,15 +1328,15 @@ try {
       await reload("empty&norecover&fixture-medias");
       const imported = [];
       for (const n of ["clip-a", "clip-b", "clip-c"]) {
-        imported.push(await inChild(`filmcraft.importUrl("/__media/${n}.wav").then((v) => (v.items && v.items.length ? v.items[0] : "aucun"), (e) => "erreur : " + e.message)`).catch((e) => String(e)));
+        imported.push(await inChild(`evofilm.importUrl("/__media/${n}.wav").then((v) => (v.items && v.items.length ? v.items[0] : "aucun"), (e) => "erreur : " + e.message)`).catch((e) => String(e)));
       }
       const seq = await exec("file.newSequence", { fromItems: imported, name: "S-medias" });
-      await exec("file.saveCopy", { path: "/opfs/evora-lab/medias.fcproj" });
-      const mediaFixture = await inChild("filmcraft.readFile('/opfs/evora-lab/medias.fcproj').then((u) => { let s = ''; for (const b of u) s += String.fromCharCode(b); return btoa(s); }, (e) => 'erreur : ' + e)").catch((e) => String(e));
+      await exec("file.saveCopy", { path: "/opfs/evora-lab/medias.evofilm" });
+      const mediaFixture = await inChild("evofilm.readFile('/opfs/evora-lab/medias.evofilm').then((u) => { let s = ''; for (const b of u) s += String.fromCharCode(b); return btoa(s); }, (e) => 'erreur : ' + e)").catch((e) => String(e));
       let mediaFormat = null;
       try { mediaFormat = JSON.parse(b64(mediaFixture).toString("utf-8")).format; } catch {}
       r.mediaFixture = { imported, seq: typeof seq === "string" ? seq : "ok", format: mediaFormat, bytes: b64(mediaFixture).length };
-      if (!imported.every((i) => typeof i === "number") || mediaFormat !== "filmcraft.project" || !MEDIA_PATHS.every((p) => b64(mediaFixture).toString("utf-8").includes(p))) {
+      if (!imported.every((i) => typeof i === "number") || mediaFormat !== "evofilm.project" || !MEDIA_PATHS.every((p) => b64(mediaFixture).toString("utf-8").includes(p))) {
         flag("PREMISSE", `projet « médias » : ${JSON.stringify(r.mediaFixture)}`);
       }
 
@@ -1392,7 +1392,7 @@ try {
       // 2. S-ACK : le projet n'est enregistré qu'à l'accusé ; modifié pendant l'envoi, il le reste ;
       //    refusé (409), il le reste ; rouvert (même docRef), il est propre
       const RA = await ulid();
-      const openA = await openDoc(RA, "temoin-ack.fcproj", String(fixture));
+      const openA = await openDoc(RA, "temoin-ack.evofilm", String(fixture));
       if (openA?.payload?.ok !== true) flag("S-ACK", `ouverture : ${JSON.stringify(openA)}`);
       await exec("file.newSequence", { name: "ack-1" });
       if (!(await dirtyIs(RA, true, 10000))) flag("S-ACK", "aucune modification signalée (ack-1)");
@@ -1422,7 +1422,7 @@ try {
       pr = await inspect();
       r.ack409 = { save: save?.type ?? null, dirty: pr?.dirty };
       if (save?.type !== "evora:save" || pr?.dirty !== true) flag("S-ACK", `refus 409 : ${JSON.stringify(r.ack409)}`);
-      const reopen = await openDoc(RA, "temoin-ack.fcproj", String(fixture));
+      const reopen = await openDoc(RA, "temoin-ack.evofilm", String(fixture));
       const cleanReopen = await dirtyIs(RA, false, 10000);
       pr = await inspect();
       r.reopen = { ack: reopen?.payload ?? null, dirty: pr?.dirty };
@@ -1439,7 +1439,7 @@ try {
       r.commandAllowed = { ack: allowed?.payload ?? null, bins: t1.bins };
       if (allowed?.payload?.ok !== true || !t1.bins.includes(BIN)) flag("COMMAND-ALLOWED", JSON.stringify(r.commandAllowed));
       const refused = {};
-      for (const [k, c, params] of [["lien", "help.github", {}], ["fichier", "file.open", { path: "/evora/x.fcproj" }], ["inconnue", "pas.une.commande", {}]]) {
+      for (const [k, c, params] of [["lien", "help.github", {}], ["fichier", "file.open", { path: "/evora/x.evofilm" }], ["inconnue", "pas.une.commande", {}]]) {
         refused[k] = (await command(c, params))?.payload ?? null;
       }
       const t2 = await tree();
@@ -1450,7 +1450,7 @@ try {
       }
       const xs = await send(await msg("evora:command", { command: "file.newBin", params: {}, extra: 1 }));
       // règle 1 : chaque sonde est une entrée vivante du menu (prémisse), refusée par le pont
-      const menuEn = await inChild("filmcraft.request('ui.menu.list')").catch(() => []);
+      const menuEn = await inChild("evofilm.request('ui.menu.list')").catch(() => []);
       const liveIds = new Set((Array.isArray(menuEn) ? menuEn : []).map((m) => m.id));
       // COR-FK-B2 : file.projectManager n'est plus une sonde, il n'a plus d'entrée en mode hôte (MENUS-MASKED)
       const SHELL_PROBES = ["file.saveAll", "file.saveAsTemplate", "file.closeProject", "file.closeAllProjects", "file.exportSelectionProject",
@@ -1503,7 +1503,7 @@ try {
       await waitFor(answer(la, "evora:ack"), 10000);
       const cat2 = await next("evora:commands", nCat, 10000);
       await sleep(500);
-      const menuEs = await inChild("filmcraft.request('ui.menu.list')").catch(() => []);
+      const menuEs = await inChild("evofilm.request('ui.menu.list')").catch(() => []);
       const esLabel = (Array.isArray(menuEs) ? menuEs : []).find((m) => m.id === "file.newSequence")?.label ?? null;
       const by2 = cat2 ? checkCatalog(cat2, "es") : null;
       r.catalogEs = { catalog: by2?.["file.newSequence"]?.label ?? null, menu: esLabel, en: by1?.["file.newSequence"]?.label ?? null };
@@ -1514,7 +1514,7 @@ try {
       // 4 bis. COR-FK-B2 (mode hôte) : thème Evora (THEME-EVORA, THEME-ACCENT), étiquettes Evora
       //    (LABELS-EVORA), fonctions exclues de Corte V1 masquées (MENUS-MASKED), jeu de raccourcis
       //    Evora (KEYS-EVORA), termes sensibles et nom amont au rendu, menus et catalogue (TERMES-RENDU)
-      const info = () => inChild("filmcraft.info()").catch(() => null);
+      const info = () => inChild("evofilm.info()").catch(() => null);
       const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
       const lum = (hex) => {
         const v = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((x) => (x <= 0.04045 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4));
@@ -1565,7 +1565,7 @@ try {
       };
       const field = (l, k) => LABEL_IDS.map((id) => (Array.isArray(l?.labels) ? l.labels : []).find((x) => x.id === id)?.[k] ?? null);
       const labelMenu = async () => {
-        const m = await inChild("filmcraft.request('ui.menu.list')").catch(() => []);
+        const m = await inChild("evofilm.request('ui.menu.list')").catch(() => []);
         return LABEL_IDS.map((id) => (Array.isArray(m) ? m : []).find((x) => x.id === `edit.label.${id}`)?.label ?? null);
       };
       const setLang = async (lang, engineLang) => waitFor(answer(await send(await msg("evora:lang", { lang, engineLang })), "evora:ack"), 10000);
@@ -1587,10 +1587,10 @@ try {
       // ni de catalogue en mode hôte, jamais jouées
       const HIDDEN_IDS = ["media.attachProxies", "media.createProxies", "media.detachProxies", "media.reconnectFullRes", "media.toggleProxies", "file.projectManager",
         "sequence.renderEffectsInToOut", "sequence.renderInToOut", "sequence.renderSelection", "sequence.renderAudio", "sequence.deleteRenderFiles", "sequence.deleteRenderFilesInToOut",
-        "sequence.transcribe", "app.settings.mediaAnalysis", "window.panel.TextToSpeech", "help.filmcraftHelp", "help.github", "help.reportIssue", "help.revealLogFiles"];
+        "sequence.transcribe", "app.settings.mediaAnalysis", "window.panel.TextToSpeech", "help.evofilmHelp", "help.github", "help.reportIssue", "help.revealLogFiles"];
       const HIDDEN_SPACES = ["transcript.", "tts.", "voiceover."];
       const hidden = (id) => HIDDEN_IDS.includes(id) || HIDDEN_SPACES.some((p) => String(id).startsWith(p));
-      const hostMenu = await inChild("filmcraft.request('ui.menu.list')").catch(() => []);
+      const hostMenu = await inChild("evofilm.request('ui.menu.list')").catch(() => []);
       const hostIds = (Array.isArray(hostMenu) ? hostMenu : []).map((m) => m.id);
       const outside = report.menuIdsOutside ?? [];
       r.menusMasked = {
@@ -1625,7 +1625,7 @@ try {
         return { where, keys: k, audit: audit?.count ?? null, adopted: adopted.length, stillActive: adopted.filter((x) => active.has(x)).slice(0, 6), active: active.size };
       };
       const keys1 = await keysNow("démarrage");
-      const reload1 = await exec("shortcuts.loadPreset", { name: "FilmCraft Default" });
+      const reload1 = await exec("shortcuts.loadPreset", { name: "EvoFilm Default" });
       await sleep(1500);
       const keys2 = await keysNow("profil par défaut rechargé");
       r.keys = { load: reload1, checks: [keys1, keys2] };
@@ -1637,7 +1637,7 @@ try {
       for (const [lang, code] of [["fr", "fr"], ["de", "de"], ["es", "es"], ["it", "it"], ["pt", "pt-br"], ["ru", "ru"], ["id", "id"], ["en", "en"]]) {
         await setLang(lang, code);
         await sleep(500);
-        const m = await inChild("filmcraft.request('ui.menu.list')").catch(() => []);
+        const m = await inChild("evofilm.request('ui.menu.list')").catch(() => []);
         const labels = (Array.isArray(m) ? m : []).map((x) => String(x.label));
         r.rendu.menus[lang] = { items: labels.length, hits: termHits(labels).slice(0, 6) };
       }
@@ -1662,7 +1662,7 @@ try {
       pr = await inspect();
       const asName = sa?.payload?.name;
       r.saveAs = { msg: sa ? { docRef: sa.payload?.docRef, name: asName, saveAs: sa.payload?.saveAs, hasRe: sa.hasRe } : null, path: pr?.path ?? null };
-      if (!sa || sa.payload?.saveAs !== true || sa.payload?.docRef !== RA || sa.hasRe || typeof asName !== "string" || !asName.endsWith(".fcproj") || pr?.path !== `/evora/${RB}/${asName}`) {
+      if (!sa || sa.payload?.saveAs !== true || sa.payload?.docRef !== RA || sa.hasRe || typeof asName !== "string" || !asName.endsWith(".evofilm") || pr?.path !== `/evora/${RB}/${asName}`) {
         flag("SAVE-AS-ADOPT", JSON.stringify(r.saveAs));
       }
       await exec("file.newSequence", { name: "as-2" });
@@ -1685,7 +1685,7 @@ try {
       if (!ready) return { bad, r };
       const RM = await ulid();
       mediaLog.length = 0;
-      const openM = await openDoc(RM, "medias.fcproj", String(mediaFixture));
+      const openM = await openDoc(RM, "medias.evofilm", String(mediaFixture));
       await sleep(1500);
       const needs = ofType(await getLog(), "evora:need");
       const needPaths = needs.flatMap((m) => m.payload?.paths ?? []);
@@ -1702,14 +1702,14 @@ try {
       for (const nd of needs) await answerNeed(nd, (p) => (p.endsWith("clip-c.wav") ? "x403" : "ok"));
       let remotes = null;
       for (let i = 0; i < 60 && !remotes; i++) {
-        const f = await inChild("filmcraft.files()").catch(() => []);
+        const f = await inChild("evofilm.files()").catch(() => []);
         const got = MEDIA_PATHS.map((p) => (Array.isArray(f) ? f : []).find((x) => x.path === p));
         if (got.every((x) => x && x.kind === "remote" && x.size === MEDIA_WAV.length)) remotes = got;
         else await sleep(500);
       }
       pr = await inspect();
       r.remotes = { ok: !!remotes, dirty: pr?.dirty };
-      if (!remotes) flag("S-MED", `médias non enregistrés : ${JSON.stringify(await inChild("filmcraft.files()").catch((e) => String(e)))}`);
+      if (!remotes) flag("S-MED", `médias non enregistrés : ${JSON.stringify(await inChild("evofilm.files()").catch((e) => String(e)))}`);
       if (pr?.dirty !== false) flag("S-MED", `projet modifié par l'arrivée des médias : ${JSON.stringify(pr?.dirty)}`);
 
       // 8. S-MED-RENEW : l'URL de clip-c expire en cours de lecture (les lectures y butent) ; un
@@ -1849,7 +1849,7 @@ try {
       let wg = null;
       for (const until = Date.now() + 90000; Date.now() < until; ) {
         try {
-          wg = await inChild("(() => { const l = window.filmcraftLoad || {}; return { readyMs: l.readyMs ?? null, error: l.error ?? null, search: location.search, old: !!window.__smokeAncien }; })()");
+          wg = await inChild("(() => { const l = window.evofilmLoad || {}; return { readyMs: l.readyMs ?? null, error: l.error ?? null, search: location.search, old: !!window.__smokeAncien }; })()");
           if (!wg.old && wg.search.includes("webgl") && wg.readyMs) break;
         } catch {
           // document en cours de remplacement
@@ -1859,7 +1859,7 @@ try {
       if (wg?.readyMs) markReady();
       const readyWg = await waitFor((log) => fromEngine(log).find((m) => m.type === "evora:ready"), 20000);
       await sleep(1000);
-      const infoWg = await inChild("filmcraft.info()").catch(() => null);
+      const infoWg = await inChild("evofilm.info()").catch(() => null);
       const q = new URLSearchParams(String(wg?.search ?? ""));
       r.webgl = { load: wg, readies: await count("evora:ready"), failed: await count("evora:failed"), backend: infoWg?.backend ?? null };
       if (!wg?.readyMs || q.get("host") !== "evora" || !q.has("webgl") || !q.has("wgfail") || !readyWg || r.webgl.readies !== 1 || r.webgl.failed !== 0 || !/gl/i.test(String(r.webgl.backend))) {
@@ -1868,11 +1868,11 @@ try {
 
       // 13. WRITE-NEW : la création exclusive (write_file_new, audio incorporé d'un AAF) passe par le
       //     crochet d'écriture : vers Drive avec export.drive, refusée sans, jamais un succès muet
-      const writeNew = (p) => inChild(`(async () => { const b = new Uint8Array(await (await fetch("/__media/clip-a.wav")).arrayBuffer()); return filmcraft.writeFileNew(${JSON.stringify(p)}, b).then(() => true, (e) => "erreur : " + e.message); })()`).catch((e) => String(e));
+      const writeNew = (p) => inChild(`(async () => { const b = new Uint8Array(await (await fetch("/__media/clip-a.wav")).arrayBuffer()); return evofilm.writeFileNew(${JSON.stringify(p)}, b).then(() => true, (e) => "erreur : " + e.message); })()`).catch((e) => String(e));
       r.writeNew = {};
       ready = await start("host=evora&lang=en&theme=dark&v1-ecriture");
       if (ready) {
-        await openDoc(await ulid(), "ecriture.fcproj", String(fixture));
+        await openDoc(await ulid(), "ecriture.evofilm", String(fixture));
         const nE = await count("evora:export");
         const w1 = await writeNew("/files/audio-incorpore.wav");
         const w2 = await writeNew("/files/audio-incorpore.wav");
@@ -1884,10 +1884,10 @@ try {
       }
       ready = await start("host=evora&lang=en&theme=dark&v1-sans-export", V1_CAPS.filter((c) => c !== "export.drive"));
       if (ready) {
-        await openDoc(await ulid(), "ecriture.fcproj", String(fixture));
+        await openDoc(await ulid(), "ecriture.evofilm", String(fixture));
         const w3 = await writeNew("/files/audio-refuse.wav");
         await sleep(1000);
-        const listed = (await inChild("filmcraft.files()").catch(() => [])).some?.((f) => f.path === "/files/audio-refuse.wav") ?? null;
+        const listed = (await inChild("evofilm.files()").catch(() => [])).some?.((f) => f.path === "/files/audio-refuse.wav") ?? null;
         r.writeNew.refused = { result: w3, exports: await count("evora:export"), listed };
         if (w3 === true || !/inside Evora/.test(String(w3)) || r.writeNew.refused.exports !== 0 || listed !== false) flag("WRITE-NEW", `sans export.drive : ${JSON.stringify(r.writeNew.refused)}`);
       }

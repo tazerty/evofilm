@@ -1,0 +1,8 @@
+asset:        favicon.png
+title:        Web app icon of the Evora fork (favicon and loading image), 128 px
+author:       Evora (fork tazerty/evofilm), original geometric drawing
+source:       original work: an indigo rounded square with three timeline bars and a playhead, drawn with Pillow (no font, no third-party artwork)
+license:      MIT OR Apache-2.0
+license-file: LICENSE-MIT, LICENSE-APACHE
+added:        2026-10-12 by Evora (fork tazerty/evofilm), patch E1
+notes:        Replaces the EvoFilm owl icon in the web build only (patch E1: the web build carries no Upstream or EvoFilm identity). The owl stays in assets/app-icon/ for the desktop packages, unchanged.

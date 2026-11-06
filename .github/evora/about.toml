@@ -1,5 +1,5 @@
 # cargo-about du build web Evora : licences tierces agrégées dans LICENSES/ de l'artefact.
-# Même graphe que deny.toml (crate filmcraft-web, cible wasm32) ; ordre de préférence quand une
+# Même graphe que deny.toml (crate evofilm-web, cible wasm32) ; ordre de préférence quand une
 # crate offre un choix (« MIT OR Apache-2.0 » → MIT).
 accepted = [
     "MIT",

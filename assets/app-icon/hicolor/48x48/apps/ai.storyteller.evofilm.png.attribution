@@ -1,0 +1,8 @@
+asset:        ai.storyteller.evofilm.png
+title:        EvoFilm app icon, Linux hicolor theme 48 px
+author:       Brandon Thomas (EvoFilm owner), for the EvoFilm project
+source:       original work (drawn by the owner in Upstream, then vectorised)
+license:      MIT OR Apache-2.0
+license-file: assets/app-icon/LICENSE.txt
+added:        2026-10-02 by Claude (agent) for Brandon Thomas
+notes:        Rendered from evofilm.svg with resvg by packaging/icons.sh.

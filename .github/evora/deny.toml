@@ -1,8 +1,8 @@
-# cargo-deny du build web Evora (fork tazerty/filmcraft, futur moteur d'Evora Corte).
+# cargo-deny du build web Evora (fork tazerty/evofilm, futur moteur d'Evora Corte).
 #
 # L'amont n'a pas de deny.toml : ce fichier est propre au fork et ne sert qu'à la CI Evora
 # (.github/workflows/evora-web.yml, `cargo deny --config .github/evora/deny.toml`).
-# Graphe vérifié : celui de l'artefact livré, la crate filmcraft-web compilée pour wasm32.
+# Graphe vérifié : celui de l'artefact livré, la crate evofilm-web compilée pour wasm32.
 #
 # Règle : aucun niveau n'est abaissé sous la valeur par défaut de cargo-deny et aucun avis n'est
 # ignoré en silence. Toute exception future se déclare ici, une par une, avec sa raison, et se
@@ -62,8 +62,8 @@ exceptions = [
 ignore = false
 
 [sources]
-# Seuls crates.io et la révision épinglée de storytold/craft-libs (Cargo.lock) sont admis.
+# Seul crates.io est admis : les bibliothèques amont sont recopiées sous vendor/evo-libs (dépendances par chemin).
 unknown-registry = "deny"
 unknown-git = "deny"
 allow-registry = ["https://github.com/rust-lang/crates.io-index"]
-allow-git = ["https://github.com/storytold/craft-libs"]
+allow-git = []

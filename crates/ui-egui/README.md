@@ -1,4 +1,4 @@
-# FilmCraft interface
+# EvoFilm interface
 
 The egui frontend draws panels and dialogs, and dispatches project changes through the engine.
 Interactive controls keep stable automation ids regardless of the interface language.
@@ -23,7 +23,7 @@ incompatible clip types show no valid transition preview. Ordinary effects retai
 outline. `timeline.transitionDropPreview` exposes the span and edge to automation.
 
 `transition_drop_ui` covers both edges of short video/audio clips, hover without project edits,
-the committed span and undo. Set `FILMCRAFT_UI_SNAPSHOT_DIR` to render screenshots with wgpu.
+the committed span and undo. Set `EVOFILM_UI_SNAPSHOT_DIR` to render screenshots with wgpu.
 
 ## Localisation
 
@@ -36,7 +36,7 @@ preferred languages that the interface has (the host supplies them through
 `HostHooks::system_languages`: `sys-locale` on the desktop, `navigator.languages` on the web),
 otherwise English.
 The `app.language.*` UI commands and `prefs.set` reach it through the control channel.
-Japanese requires a craft-fonts build or a suitable installed font.
+Japanese requires a evo-fonts build or a suitable installed font.
 
 English source strings are lookup keys in `src/i18n/<code>.tsv`. `tl!` translates literals, `tlf!`
 fills translated templates, and `i18n::t` translates names from registries. Placeholder values
@@ -53,7 +53,7 @@ build. `cargo xtask i18n-report` prints each language's missing strings (menus, 
 registry names) and its entries whose source the interface no longer has; `cargo xtask ci` prints
 the same report in its log.
 
-Verification: `cargo test -p filmcraft-ui-egui` checks catalog syntax, duplicate keys, placeholders
+Verification: `cargo test -p evofilm-ui-egui` checks catalog syntax, duplicate keys, placeholders
 and UI behaviour in other languages (switching, search, font coverage); `cargo xtask ci` runs the
 workspace gates. Visual checks use the control channel to switch language and capture the resulting
 panels.
@@ -78,8 +78,8 @@ keeps Source navigation, markers and marked-range playback separate from Program
 
 ## Pane layout controls
 
-Dock transactions and pointer targets use `craft-ui::docking`; bounded split geometry and
-keyboard-accessible resize handles use `craft-ui::layout`. FilmCraft adapts its existing saved
+Dock transactions and pointer targets use `evo-ui::docking`; bounded split geometry and
+keyboard-accessible resize handles use `evo-ui::layout`. EvoFilm adapts its existing saved
 dock tree and panel identities to the shared model. Panel tabs or their header grip can move
 between tab groups, split at an edge, reorder, or float when released with Cmd/Ctrl. Floating
 panels move by their empty header and resize from the bottom-right corner. Timeline sequence
@@ -96,7 +96,7 @@ separately. Focus and input-ownership regressions cover document/playhead preser
 
 Compact monitor layouts separate the current and duration timecodes from zoom, resolution and
 settings. Source video/audio drag choices retain their existing placement behavior. Transport
-buttons use `craft-ui::layout::fit_toolbar`; commands beyond the available width remain available
+buttons use `evo-ui::layout::fit_toolbar`; commands beyond the available width remain available
 through More, including their selected state and Source/Program routing. A scrolling fallback
 retains all commands if even More cannot fit. `monitor_geometry` checks the painted readouts,
 control bounds, overflow actions and Source drag payloads across monitor widths and themes.

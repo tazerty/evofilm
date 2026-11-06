@@ -1,5 +1,5 @@
 [package]
-name = "filmcraft-isobmff"
+name = "evofilm-isobmff"
 description = "Clean-room ISO BMFF (MP4) and QuickTime (MOV) demuxer and muxer"
 version.workspace = true
 edition.workspace = true
@@ -10,9 +10,9 @@ rust-version.workspace = true
 workspace = true
 
 [dependencies]
-craft-media = { workspace = true, features = ["isobmff"] }
+evo-media = { workspace = true, features = ["isobmff"] }
 
 [dev-dependencies]
-filmcraft-testkit = { workspace = true }
+evofilm-testkit = { workspace = true }
 proptest = { workspace = true }
 serde_json = { workspace = true }

@@ -1,6 +1,6 @@
 //! Settings ▸ Media ▸ Automatically refresh growing files: media files that change on disk while
 //! the project is open are read again, whether they are still being written (a recording, an
-//! ingest) or were replaced (a render from EffectCraft or After Effects written over the file a
+//! ingest) or were replaced (a render from EvoEffect or After Effects written over the file a
 //! clip uses).
 //!
 //! Each file media item's file is compared by size and modification time with what it was when
@@ -16,12 +16,12 @@
 //! the file changed, not the edit. A file seen for the first time is only remembered; one that
 //! can't be opened (still being written) is tried again once it changes again, not on every look.
 //!
-//! [`MediaInfo`]: filmcraft_media::MediaInfo
+//! [`MediaInfo`]: evofilm_media::MediaInfo
 
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::sync::{Arc, Mutex, PoisonError};
 
-use filmcraft_project::{ItemId, ItemKind, MediaRef, Project};
+use evofilm_project::{ItemId, ItemKind, MediaRef, Project};
 use serde_json::{Value, json};
 
 use crate::{MediaPool, Result, Session};
@@ -131,7 +131,7 @@ impl Session {
             match self.media.open_file(&file, &*self.services) {
                 Ok(src) => {
                     let mut info = src.info().clone();
-                    if info.kind == filmcraft_media::MediaKind::Still
+                    if info.kind == evofilm_media::MediaKind::Still
                         && let Some(v) = info.video.as_mut()
                     {
                         v.frame_rate = crate::settings::timebase_rate(&self.prefs.media.indeterminate_timebase);
@@ -144,7 +144,7 @@ impl Session {
                 }
             }
         }
-        // A file that can't be opened (still being written, or not media FilmCraft reads) keeps its
+        // A file that can't be opened (still being written, or not media EvoFilm reads) keeps its
         // new stamp: it is tried again once it changes again, not on every look.
         if fresh.is_empty() {
             return Ok(json!({"refreshed": []}));

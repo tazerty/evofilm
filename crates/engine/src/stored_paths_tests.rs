@@ -6,9 +6,9 @@
 use std::path::Path;
 use std::sync::{Arc, Mutex, PoisonError};
 
-use filmcraft_media::DemoScene;
-use filmcraft_project::{ItemId, MediaRef};
-use filmcraft_render::offline::OfflineReason;
+use evofilm_media::DemoScene;
+use evofilm_project::{ItemId, MediaRef};
+use evofilm_render::offline::OfflineReason;
 use serde_json::json;
 
 use crate::media_test_util::{make_movie, session_with, tmp_dir};
@@ -44,7 +44,7 @@ impl Services for Recording {
         self.note(path);
         FsServices.read_range(path, offset, len)
     }
-    fn reader(&self, path: &str) -> Option<std::io::Result<filmcraft_media::SharedReader>> {
+    fn reader(&self, path: &str) -> Option<std::io::Result<evofilm_media::SharedReader>> {
         self.note(path);
         FsServices.reader(path)
     }
@@ -94,7 +94,7 @@ fn stored_media_paths_open_only_on_this_computer_or_beside_the_project() {
     for (id, path) in items.iter().zip(&stored) {
         p.item_mut(*id).unwrap().as_media_mut().unwrap().media = MediaRef::File { path: path.clone() };
     }
-    let doc = project.join("p.fcproj").to_string_lossy().into_owned();
+    let doc = project.join("p.evofilm").to_string_lossy().into_owned();
     s.execute("file.save", json!({"path": doc})).unwrap();
 
     let (mut t, seen) = recording_session();

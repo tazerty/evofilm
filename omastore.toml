@@ -1,11 +1,11 @@
 kind = "app"
 categories = ["AudioVideo", "Video", "AudioVideoEditing"]
-icon = "assets/app-icon/hicolor/256x256/apps/ai.storyteller.filmcraft.png"
+icon = "assets/app-icon/hicolor/256x256/apps/ai.storyteller.evofilm.png"
 
 [linux.x86_64]
-asset = "filmcraft-{version}-linux-x86_64.tar.gz"
-exec = "filmcraft-{version}-linux-x86_64/bin/filmcraft"
+asset = "evofilm-{version}-linux-x86_64.tar.gz"
+exec = "evofilm-{version}-linux-x86_64/bin/evofilm"
 
 [linux.aarch64]
-asset = "filmcraft-{version}-linux-aarch64.tar.gz"
-exec = "filmcraft-{version}-linux-aarch64/bin/filmcraft"
+asset = "evofilm-{version}-linux-aarch64.tar.gz"
+exec = "evofilm-{version}-linux-aarch64/bin/evofilm"

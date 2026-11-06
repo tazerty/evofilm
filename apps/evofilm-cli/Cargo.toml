@@ -1,0 +1,38 @@
+[package]
+name = "evofilm-cli"
+description = "EvoFilm headless CLI and MCP server"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[[bin]]
+name = "evofilm-cli"
+path = "src/main.rs"
+
+[features]
+default = []
+# Speech-to-text (Text panel ▸ Transcribe) with Whisper on the CPU, and model downloads.
+whisper = ["evofilm-engine/whisper", "evofilm-engine/speech-download"]
+
+[dependencies]
+evofilm-engine = { workspace = true }
+evofilm-export = { workspace = true }
+evofilm-project = { workspace = true }
+evofilm-render = { workspace = true }
+evofilm-time = { workspace = true }
+evofilm-gpu = { workspace = true }
+evofilm-media = { workspace = true }
+evofilm-codecs = { workspace = true }
+evofilm-platform = { workspace = true }
+evofilm-mxf = { workspace = true }
+evofilm-mpegts = { workspace = true }
+evofilm-ogg = { workspace = true }
+evofilm-automation = { workspace = true }
+serde_json = { workspace = true }
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+
+[dev-dependencies]
+evofilm-testkit = { workspace = true }

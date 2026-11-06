@@ -219,7 +219,7 @@ en	Essential Sound Setting	Audio Assistant Setting
 en	Final Cut Pro Compatible	Alternative Layout A
 en	Avid Media Composer Compatible	Alternative Layout B
 
-# --- E7: links to the outside are not opened in Evora (apps/filmcraft-web: open_url hook) --------
+# --- E7: links to the outside are not opened in Evora (apps/evofilm-web: open_url hook) --------
 # The status line must not claim a link was opened.
 en	Opened {url}	External link not opened: {url}
 es	Opened {url}	Enlace externo no abierto: {url}

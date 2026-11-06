@@ -44,7 +44,7 @@ fn discard_fixture(tag: &str) -> (Session, std::path::PathBuf) {
         .map(|id| {
             let dir = d.join(id);
             std::fs::create_dir(&dir).unwrap();
-            std::fs::write(dir.join("snapshot.fcproj"), b"retained snapshot").unwrap();
+            std::fs::write(dir.join("snapshot.evofilm"), b"retained snapshot").unwrap();
             autosave::RecoveryCandidate { id: id.into(), dir, meta: Default::default() }
         })
         .collect();
@@ -69,8 +69,8 @@ fn discard_failure_preserves_candidates_and_allows_retry() {
     assert!(s.execute("file.discardRecovery", json!({"all": true})).is_err());
     assert_eq!(recovery_ids(&mut s), ["first", "second", "third"]);
     assert!(s.is_enabled("file.discardRecovery"));
-    assert!(d.join("second/snapshot.fcproj").exists());
-    assert!(d.join("third/snapshot.fcproj").exists());
+    assert!(d.join("second/snapshot.evofilm").exists());
+    assert!(d.join("third/snapshot.evofilm").exists());
     std::fs::remove_file(d.join("first")).unwrap();
     std::fs::create_dir(d.join("first")).unwrap();
     assert_eq!(s.execute("file.discardRecovery", json!({"all": true})).unwrap()["discarded"], 3);
@@ -86,7 +86,7 @@ fn discard_failure_keeps_only_not_yet_deleted_candidates() {
     assert!(s.execute("file.discardRecovery", json!({"all": true})).is_err());
     assert_eq!(recovery_ids(&mut s), ["second", "third"]);
     assert!(!d.join("first").exists());
-    assert!(d.join("third/snapshot.fcproj").exists());
+    assert!(d.join("third/snapshot.evofilm").exists());
     s.shutdown();
     std::fs::remove_dir_all(d).unwrap();
 }
@@ -97,8 +97,8 @@ fn discard_selected_failure_keeps_unselected_candidates() {
     block_discard(&d.join("second"));
     assert!(s.execute("file.discardRecovery", json!({"id": "second"})).is_err());
     assert_eq!(recovery_ids(&mut s), ["first", "second", "third"]);
-    assert!(d.join("first/snapshot.fcproj").exists());
-    assert!(d.join("third/snapshot.fcproj").exists());
+    assert!(d.join("first/snapshot.evofilm").exists());
+    assert!(d.join("third/snapshot.evofilm").exists());
     s.shutdown();
     std::fs::remove_dir_all(d).unwrap();
 }
@@ -110,7 +110,7 @@ fn discard_default_failure_does_not_select_another_candidate() {
     let error = s.execute("file.discardRecovery", json!({})).unwrap_err().to_string();
     assert!(error.contains("first"), "{error}");
     assert_eq!(recovery_ids(&mut s), ["first", "second", "third"]);
-    assert!(d.join("second/snapshot.fcproj").exists());
+    assert!(d.join("second/snapshot.evofilm").exists());
     s.shutdown();
     std::fs::remove_dir_all(d).unwrap();
 }
@@ -126,7 +126,7 @@ fn discard_selection_and_unknown_id_preserve_other_candidates() {
     assert_eq!(s.execute("file.discardRecovery", json!({})).unwrap()["discarded"], 1);
     assert_eq!(recovery_ids(&mut s), ["third"]);
     assert!(!d.join("first").exists());
-    assert!(d.join("third/snapshot.fcproj").exists());
+    assert!(d.join("third/snapshot.evofilm").exists());
     s.shutdown();
     std::fs::remove_dir_all(d).unwrap();
 }
@@ -158,7 +158,7 @@ fn preferences_get_set_and_persist() {
 #[test]
 fn crash_recovery_end_to_end() {
     let d = temp_dir("recover");
-    let proj = d.join("film.fcproj").to_string_lossy().to_string();
+    let proj = d.join("film.evofilm").to_string_lossy().to_string();
     // Session A: saved project, then unsaved edits, then a crash.
     let mut a = demo();
     start(&mut a, &d);
@@ -197,7 +197,7 @@ fn crash_recovery_end_to_end() {
     c.execute("file.save", json!({})).unwrap();
     wait_for("journal cleared", || {
         c.poll_persistence();
-        !c.persistence.as_ref().unwrap().session_dir.join("snapshot.fcproj").exists()
+        !c.persistence.as_ref().unwrap().session_dir.join("snapshot.evofilm").exists()
     });
     let session_dir = c.persistence.as_ref().unwrap().session_dir.clone();
     c.shutdown();
@@ -234,7 +234,7 @@ fn quitting_with_unsaved_changes_keeps_them_for_next_launch() {
 #[test]
 fn auto_save_ring_rotates_and_can_save_the_project() {
     let d = temp_dir("ring");
-    let proj = d.join("ring.fcproj").to_string_lossy().to_string();
+    let proj = d.join("ring.evofilm").to_string_lossy().to_string();
     let mut s = demo();
     start(&mut s, &d);
     s.execute("prefs.set", json!({"values": {"autoSave.maxVersions": 2}})).unwrap();
@@ -280,17 +280,17 @@ fn scan_keeps_snapshot_when_session_metadata_is_unreadable() {
     let root = autosave::recovery_root(&d);
     let sess = root.join("123-1");
     std::fs::create_dir_all(&sess).unwrap();
-    let snap = filmcraft_format::encode(&filmcraft_project::Project::default(), false);
-    std::fs::write(sess.join("snapshot.fcproj"), snap).unwrap();
+    let snap = evofilm_format::encode(&evofilm_project::Project::default(), false);
+    std::fs::write(sess.join("snapshot.evofilm"), snap).unwrap();
     std::fs::write(sess.join("session.json"), b"not json {").unwrap();
     let found = autosave::scan_candidates(&d, None);
     assert_eq!(found.len(), 1);
     assert_eq!(found[0].id, "123-1");
-    assert!(sess.join("snapshot.fcproj").is_file(), "snapshot must survive the scan");
+    assert!(sess.join("snapshot.evofilm").is_file(), "snapshot must survive the scan");
     std::fs::remove_file(sess.join("session.json")).unwrap();
     let found = autosave::scan_candidates(&d, None);
     assert_eq!(found.len(), 1, "missing metadata still lists the snapshot");
-    assert!(sess.join("snapshot.fcproj").is_file());
+    assert!(sess.join("snapshot.evofilm").is_file());
     let _ = std::fs::remove_dir_all(&d);
 }
 
@@ -335,7 +335,7 @@ fn project_scratch_folders_outside_the_project_are_not_used() {
     let outside = d.join("elsewhere");
     let show = d.join("show");
     std::fs::create_dir_all(&show).unwrap();
-    let proj = show.join("cut.fcproj").to_string_lossy().to_string();
+    let proj = show.join("cut.evofilm").to_string_lossy().to_string();
     let mut a = demo();
     let named = outside.to_string_lossy().to_string();
     a.edit("scratch", |p, _| {
@@ -354,7 +354,7 @@ fn project_scratch_folders_outside_the_project_are_not_used() {
         s.drain_events().iter().any(|e| matches!(e, crate::Event::Toast { message, .. } if message.contains(&named))),
         "the user is told the folder is not used"
     );
-    assert_eq!(crate::project_tools::previews_dir(&s), Some(show.join("FilmCraft Previews").join("cut")));
+    assert_eq!(crate::project_tools::previews_dir(&s), Some(show.join("EvoFilm Previews").join("cut")));
     s.execute("sequence.addEdit", json!({"seconds": 1.0})).unwrap();
     let r = s.execute("file.autoSaveNow", json!({})).unwrap();
     let written = std::path::PathBuf::from(r["path"].as_str().unwrap());
@@ -391,7 +391,7 @@ fn project_captured_folder_outside_the_project_is_not_used() {
     let d = temp_dir("scratch-captured");
     let show = d.join("show");
     std::fs::create_dir_all(&show).unwrap();
-    let proj = show.join("cut.fcproj").to_string_lossy().to_string();
+    let proj = show.join("cut.evofilm").to_string_lossy().to_string();
     let mut s = demo();
     s.execute("file.saveAs", json!({"path": proj})).unwrap();
     let mut named = vec![d.join("elsewhere").to_string_lossy().to_string(), r"\\192.0.2.1\share\cap".to_string(), "file://192.0.2.1/s/cap".to_string()];

@@ -4,10 +4,10 @@
 use egui::{Align2, Color32, Rect, Sense, pos2, vec2};
 use serde_json::json;
 
-use crate::FilmcraftApp;
+use crate::EvoFilmApp;
 use crate::theme::Tokens;
 
-pub fn show(app: &mut FilmcraftApp, ui: &mut egui::Ui, rect: Rect) {
+pub fn show(app: &mut EvoFilmApp, ui: &mut egui::Ui, rect: Rect) {
     let t = app.tokens;
     ui.painter().rect_filled(rect, t.radius, t.panel_bg);
     ui.painter().text(rect.min + vec2(24.0, 30.0), Align2::LEFT_CENTER, tl!("Import"), Tokens::semibold(22.0), t.text);
@@ -45,7 +45,7 @@ pub fn show(app: &mut FilmcraftApp, ui: &mut egui::Ui, rect: Rect) {
         }
     }
     recent(app, ui, rect, 90.0 + 150.0 + 36.0);
-    // Evora fork (patch E1): no community section (ArtCraft wordmark and links to the ArtCraft
+    // Evora fork (patch E1): no community section (Upstream wordmark and links to the Upstream
     // Discord and website, which a modified version must remove: docs/brand/LICENSE-brand.txt).
 }
 
@@ -55,7 +55,7 @@ const RECENT_ROW_H: f32 = 28.0;
 
 /// Home's Recent list at `y`: the recent projects (newest first, file name with its folder beside
 /// it), a click opens one. Returns where the next section starts.
-fn recent(app: &mut FilmcraftApp, ui: &mut egui::Ui, rect: Rect, y: f32) -> f32 {
+fn recent(app: &mut EvoFilmApp, ui: &mut egui::Ui, rect: Rect, y: f32) -> f32 {
     let paths: Vec<String> = app.session.prefs.general.recent_projects.iter().take(RECENT_ROWS).cloned().collect();
     if paths.is_empty() {
         return y;

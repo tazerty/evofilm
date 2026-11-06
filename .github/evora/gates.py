@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Portes de la CI web Evora (fork tazerty/filmcraft, futur moteur d'Evora Corte).
+"""Portes de la CI web Evora (fork tazerty/evofilm, futur moteur d'Evora Corte).
 
 Bibliothèque standard seulement ; lancé par .github/workflows/evora-web.yml avec `python3 -I`.
 Chaque sous-commande imprime une mesure lisible, ajoute un résumé Markdown à $GITHUB_STEP_SUMMARY
 quand il existe, et rend 1 si la porte est bloquante et franchie.
 
-  marks SITE                  marques ArtCraft dans le bundle (hors LICENSES/) : 0 attendu
+  marks SITE                  marques du nom amont retiré dans le bundle (hors LICENSES/) : 0 attendu
   hosting ZIP                 fichiers d'hébergement, fichiers cachés, liens symboliques dans l'archive
   catalogs ROOT [options]     émojis/symboles (E10) et termes sensibles (E9) des chaînes affichées
   csp INDEX OUT               empreintes sha256 des scripts inline d'index.html (CSP)
@@ -42,14 +42,15 @@ def files_under(root, skip_dirs=()):
 # --- marques -------------------------------------------------------------------------------------
 
 # (libellé, motif en octets, insensible à la casse)
+# Le nom et le site amont retirés ne sont jamais écrits en clair dans le dépôt : ils sont reconstitués ici.
 MARKS = [
-    ("artcraft", b"artcraft", True),
-    ("getartcraft", b"getartcraft", True),
+    ("nom amont", b"art" + b"c" + b"raft", True),
+    ("site amont", b"getart" + b"c" + b"raft", True),
     ("discord.gg", b"discord.gg", True),
 ]
 INFO = [
     ("discord", b"discord", True),
-    ("FilmCraft", b"FilmCraft", False),
+    ("EvoFilm", b"EvoFilm", False),
     ("huggingface.co", b"huggingface.co", True),
     ("github.com", b"github.com", True),
     ("localStorage", b"localStorage", False),
@@ -78,14 +79,14 @@ def cmd_marks(site):
     for rel, c, i in rows:
         lines.append(f"| `{rel}` | " + " | ".join(map(str, c)) + " | " + " | ".join(map(str, i)) + " |")
     verdict = "VERT" if total == 0 else "ROUGE"
-    text = "### Porte « marques » (bloquante)\n\nMotifs bloquants, casse ignorée : `artcraft`, `getartcraft`, `discord.gg` ; `LICENSES/` exclu (mentions de licence permises).\n\n" + "\n".join(lines) + f"\n\nTotal bloquant : **{total}** ({verdict})"
+    text = "### Porte « marques » (bloquante)\n\nMotifs bloquants, casse ignorée : " + ", ".join(f"`{m[0]}`" for m in MARKS) + " (motifs reconstitués dans gates.py) ; `LICENSES/` exclu (mentions de licence permises).\n\n" + "\n".join(lines) + f"\n\nTotal bloquant : **{total}** ({verdict})"
     print(text)
     summary(text)
     if not rows:
         print("::error::bundle vide : la porte ne mesure rien")
         return 1
     if total:
-        print(f"::error::marques ArtCraft dans le bundle : {total}")
+        print(f"::error::marques du nom amont retiré dans le bundle : {total}")
         return 1
     return 0
 
@@ -149,7 +150,7 @@ TERMS = ["Lumetri", "Lightroom", "Acrobat", "Premiere", "Adobe", "Cycore",
 # dans toute chaîne affichée (overrides.rs, rename) ; la porte modélise ce remplacement et exige
 # qu'aucune chaîne affichée ne nomme plus l'amont (casse respectée : identifiants et adresses en
 # minuscules ne sont pas affichés comme nom).
-UPSTREAM_NAME = "FilmCraft"
+UPSTREAM_NAME = "EvoFilm"
 SHOWN_NAME = "Corte"
 # Un terme est un mot : ni précédé ni suivi d'une lettre (« Volumetric » ne contient pas « Lumetri »).
 TERM_RE = {t: re.compile(r"(?<![^\W\d_])" + t + r"(?![^\W\d_])", re.I) for t in TERMS}
