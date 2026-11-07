@@ -9,6 +9,11 @@
 //! upstream app ([`UPSTREAM_NAME`]) names Corte instead ([`rename`], applied by `Language::tr` after
 //! the lookup). Identifiers, the `window.evofilm` API, file formats and the licence files (never
 //! drawn through `tr`) keep the upstream name.
+//!
+//! Patch EVORA-COR-58 (decision Q-EVO-1): what escapes the catalogs goes through the same renaming:
+//! `i18n::fmt` for the values filled in, `i18n::shown` for engine messages the interface draws as
+//! they come. The English article follows the shown name; the format names the engine's messages
+//! quote are shown as words.
 
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -18,6 +23,8 @@ use std::sync::OnceLock;
 pub const UPSTREAM_NAME: &str = "EvoFilm";
 /// The name this build shows instead.
 pub const SHOWN_NAME: &str = "Corte";
+/// Format names the engine's messages quote next to the upstream name ("expected `…`").
+const QUOTED_FORMATS: [(&str, &str); 2] = [("evofilm.project", "Corte project"), ("evofilm.graphicsTemplate", "Corte graphics template")];
 
 thread_local! {
     /// Displayed text → the same text with Corte's name, made once per text (the interface asks
@@ -36,10 +43,45 @@ pub fn rename(text: &str) -> &str {
         if let Some(&shown) = cache.get(text) {
             return shown;
         }
-        let shown: &'static str = Box::leak(text.replace(UPSTREAM_NAME, SHOWN_NAME).into_boxed_str());
+        let shown: &'static str = Box::leak(shown_text(text).into_boxed_str());
         cache.insert(text.to_string(), shown);
         shown
     })
+}
+
+/// [`rename`] for text made on the fly (`i18n::fmt`): nothing is kept.
+pub fn renamed(text: String) -> String {
+    if text.contains(UPSTREAM_NAME) { shown_text(&text) } else { text }
+}
+
+fn shown_text(text: &str) -> String {
+    let mut parts = text.split(UPSTREAM_NAME);
+    let mut out = String::with_capacity(text.len());
+    out.push_str(parts.next().unwrap_or_default());
+    for part in parts {
+        drop_an(&mut out);
+        out.push_str(SHOWN_NAME);
+        out.push_str(part);
+    }
+    for (format, shown) in QUOTED_FORMATS {
+        out = out.replace(format, shown);
+    }
+    out
+}
+
+/// "an " at the end of `out`, as a word, becomes "a ": the upstream name starts with a vowel, the
+/// shown one with a consonant. "Scan " stays as it is.
+fn drop_an(out: &mut String) {
+    if !(out.ends_with("an ") || out.ends_with("An ")) {
+        return;
+    }
+    let before = &out[..out.len() - 3];
+    if before.chars().next_back().is_some_and(char::is_alphanumeric) {
+        return;
+    }
+    let article = out.len() - 2;
+    out.truncate(article);
+    out.push(' ');
 }
 
 /// Source text → [(language code, text to display)].
@@ -71,7 +113,7 @@ pub fn lookup(code: &str, text: &str) -> (Option<&'static str>, Option<&'static 
 
 #[cfg(test)]
 mod tests {
-    use super::super::{Language, catalog};
+    use super::super::{Language, catalog, fmt, shown};
     use super::UPSTREAM_NAME;
 
     /// Emoji and pictographs the interface must not display (Evora rule "zéro émoji d'interface"):
@@ -222,6 +264,66 @@ mod tests {
         assert_eq!(super::rename("File"), "File");
         assert!(std::ptr::eq(super::rename("EvoFilm Project"), super::rename("EvoFilm Project")));
         assert_eq!(super::rename("EvoFilm Project"), "Corte Project");
+    }
+
+    /// EVORA-COR-58: the English article follows the shown name; a word that only ends like the
+    /// article is left alone.
+    #[test]
+    fn the_article_follows_the_shown_name() {
+        assert_eq!(super::rename("Not an EvoFilm project"), "Not a Corte project");
+        assert_eq!(super::rename("An EvoFilm window"), "A Corte window");
+        assert_eq!(super::rename("(an EvoFilm window)"), "(a Corte window)");
+        assert_eq!(super::rename("not a EvoFilm project"), "not a Corte project");
+        assert_eq!(super::rename("Scan EvoFilm"), "Scan Corte");
+        assert_eq!(Language::Id.tr("EvoFilm Help…"), "Bantuan Corte…");
+        assert_eq!(
+            Language::En.tr("Shows the version, community links and credits in a EvoFilm window."),
+            "Shows the version, community links and credits in a Corte window."
+        );
+    }
+
+    /// EVORA-COR-58: no catalog has a form that depends on the name starting with a vowel (an
+    /// elision, the English "an"), and what the catalogs write reads the same with the shown name.
+    /// Korean writes the particles of a final vowel (가, 는, 를), which suit Corte as well.
+    #[test]
+    fn no_catalog_form_depends_on_the_first_letter_of_the_name() {
+        // the word "an", not a word that ends like it (Indonesian "Bantuan")
+        let article = |text: &str| {
+            ["an EvoFilm", "An EvoFilm"].iter().any(|form| text.match_indices(*form).any(|(i, _)| !text[..i].chars().next_back().is_some_and(char::is_alphanumeric)))
+        };
+        let mut found: Vec<String> = Vec::new();
+        for (code, text) in upstream_catalogs() {
+            for (_, src, tr) in catalog::parse_entries(text).0 {
+                for written in [&src, &tr] {
+                    if written.contains("'EvoFilm") || written.contains("’EvoFilm") || article(written.as_str()) {
+                        found.push(format!("{code}: {written}"));
+                    }
+                }
+            }
+        }
+        assert!(found.is_empty(), "{found:#?}");
+        assert_eq!(Language::Fr.tr("About EvoFilm"), "À propos de Corte");
+        assert_eq!(Language::It.tr("Not supported by EvoFilm's encoders yet"), "Non ancora supportato dai codificatori di Corte");
+        assert_eq!(Language::Ko.tr("EvoFilm always composites in linear light"), "Corte는 항상 선형 광원으로 합성합니다");
+    }
+
+    /// EVORA-COR-58: what does not go through the catalogs (engine messages, a value filled in)
+    /// names Corte too; file extensions and identifiers are not a name.
+    #[test]
+    fn engine_messages_name_corte() {
+        assert_eq!(shown("EvoFilm 0.13.0"), "Corte 0.13.0");
+        assert_eq!(
+            shown("not a EvoFilm project: format is `x`, expected `evofilm.project`"),
+            "not a Corte project: format is `x`, expected `Corte project`"
+        );
+        assert_eq!(
+            shown("not a EvoFilm graphics template: `format` is not \"evofilm.graphicsTemplate\""),
+            "not a Corte graphics template: `format` is not \"Corte graphics template\""
+        );
+        assert_eq!(shown("first cut.evofilm"), "first cut.evofilm");
+        assert_eq!(shown("evofilm.project"), "evofilm.project");
+        assert_eq!(fmt("Failed: {e}", &[("e", "EvoFilm's encoders write progressive frames")]), "Failed: Corte's encoders write progressive frames");
+        assert_eq!(fmt("{name} Selection.evofilm", &[("name", "Cut")]), "Cut Selection.evofilm");
     }
 
     #[test]

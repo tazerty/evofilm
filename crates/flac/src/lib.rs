@@ -123,7 +123,8 @@ impl Encoder {
         let mut v = b"fLaC".to_vec();
         v.extend_from_slice(&[0, 0, 0, 34]);
         v.extend_from_slice(&self.streaminfo_with(0, 0, 0, [0; 16]));
-        let vendor = concat!("evofilm-flac ", env!("CARGO_PKG_VERSION"));
+        // Evora fork (E-COR-EXPORT-NOM, EVORA-COR-58): exported metadata names the app
+        let vendor = concat!("Corte ", env!("CARGO_PKG_VERSION"));
         let len = 4 + vendor.len() + 4;
         // last metadata block, type 4 (VORBIS_COMMENT), little-endian lengths inside
         v.push(0x84);

@@ -274,7 +274,7 @@ fn link_media(app: &mut EvoFilmApp, ctx: &egui::Context) {
                     elems.push(("linkMedia.preview".into(), rect, "preview".into()));
                 });
                 if !d.message.is_empty() {
-                    ui.colored_label(Color32::from_rgb(0xe0, 0x8a, 0x6a), &d.message);
+                    ui.colored_label(Color32::from_rgb(0xe0, 0x8a, 0x6a), crate::i18n::shown(&d.message));
                 }
             });
             ui.add_space(6.0);
@@ -573,7 +573,7 @@ fn project_manager(app: &mut EvoFilmApp, ctx: &egui::Context) {
                 calc = r.clicked();
             });
             if !d.message.is_empty() {
-                ui.colored_label(Color32::from_rgb(0xe0, 0x8a, 0x6a), &d.message);
+                ui.colored_label(Color32::from_rgb(0xe0, 0x8a, 0x6a), crate::i18n::shown(&d.message));
             }
             ui.horizontal(|ui| {
                 let r = ui.button(tl!("Cancel"));

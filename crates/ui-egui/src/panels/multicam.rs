@@ -198,7 +198,7 @@ pub fn show_dialog(app: &mut EvoFilmApp, ctx: &egui::Context) {
                 }
             }
             if !d.message.is_empty() {
-                ui.colored_label(Color32::from_rgb(0xe0, 0x8a, 0x6a), &d.message);
+                ui.colored_label(Color32::from_rgb(0xe0, 0x8a, 0x6a), crate::i18n::shown(&d.message));
             }
             ui.add_space(6.0);
             ui.horizontal(|ui| {

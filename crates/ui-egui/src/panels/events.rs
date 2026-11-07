@@ -109,7 +109,9 @@ pub fn events(app: &mut EvoFilmApp, ui: &mut egui::Ui, rect: Rect) {
             glyph(ui.painter(), pos2(r.min.x + 10.0, r.center().y), e.level);
             let when = ago(e.time_ms);
             let right = ui.painter().text(pos2(r.max.x - 6.0, r.center().y), Align2::RIGHT_CENTER, &when, Tokens::ui(11.0), t.text_faint);
-            let msg = if e.count > 1 { format!("{}  (×{})", e.message, e.count) } else { e.message.clone() };
+            // Evora fork (E1-L5-NOM, EVORA-COR-58): engine messages name Corte on screen
+            let message = crate::i18n::shown(&e.message);
+            let msg = if e.count > 1 { format!("{message}  (×{})", e.count) } else { message.to_string() };
             let clip = Rect::from_min_max(pos2(r.min.x + 22.0, r.min.y), pos2(right.min.x - 8.0, r.max.y));
             ui.painter().with_clip_rect(clip).text(pos2(clip.min.x, r.center().y), Align2::LEFT_CENTER, &msg, Tokens::ui(12.0), t.text);
             elems.push((format!("events.row.{}", e.id), r, msg));
@@ -121,10 +123,10 @@ pub fn events(app: &mut EvoFilmApp, ui: &mut egui::Ui, rect: Rect) {
     if let Some(sel) = st.selected.and_then(|id| entries.iter().find(|e| e.id == id)) {
         let (r, _) = ui.allocate_exact_size(vec2(ui.available_width(), details_h - 4.0), Sense::hover());
         ui.painter().rect_filled(r, 3.0, t.field_bg);
-        let text = format!("{} · {} · {}\n{}", crate::i18n::t(sel.level.label()), sel.source, ago(sel.time_ms), sel.message);
+        let text = format!("{} · {} · {}\n{}", crate::i18n::t(sel.level.label()), sel.source, ago(sel.time_ms), crate::i18n::shown(&sel.message));
         let g = ui.painter().layout(text, Tokens::ui(11.5), t.text, r.width() - 12.0);
         ui.painter().with_clip_rect(r).galley(r.min + vec2(6.0, 4.0), g, t.text);
-        elems.push(("events.details".into(), r, sel.message.clone()));
+        elems.push(("events.details".into(), r, crate::i18n::shown(&sel.message).to_string()));
     }
     for (id, r, l) in elems {
         app.auto.add(&id, r, &l);

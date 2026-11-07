@@ -97,7 +97,8 @@ pub(crate) fn dpx(rgba: &[u8], w: u32, h: u32) -> Result<Vec<u8>> {
     put32(&mut hd, 24, 1664); // generic header length
     put32(&mut hd, 28, 384); // industry header length
     put32(&mut hd, 32, 0); // user data length
-    hd[160..167].copy_from_slice(b"EvoFilm");
+    // Evora fork (E-COR-EXPORT-NOM, EVORA-COR-58): exported metadata names the app
+    hd[160..165].copy_from_slice(b"Corte");
     // image information header
     put16(&mut hd, 768, 0); // orientation: left to right, top to bottom
     put16(&mut hd, 770, 1); // one image element

@@ -596,7 +596,8 @@ pub fn builtin_templates() -> Vec<GraphicsTemplate> {
         let mut heading = text(1, "Heading", "CREDITS", (960.0, 160.0), 72.0, "Bold");
         set(&mut heading, "align", ParamValue::Choice(1));
         set(&mut heading, "tracking", ParamValue::Float(120.0));
-        let body = "Directed by\nJordan Lee\n\nWritten by\nPriya Natarajan\n\nEdited by\nMarco Bianchi\n\nMusic by\nHana Kobayashi\n\nMade with EvoFilm";
+        // Evora fork (E-COR-L4-NOM, EVORA-COR-58): text that ends up in the member's picture
+        let body = "Directed by\nJordan Lee\n\nWritten by\nPriya Natarajan\n\nEdited by\nMarco Bianchi\n\nMusic by\nHana Kobayashi\n\nMade with Corte";
         let mut credits = text(2, "Credits", body, (960.0, 300.0), 46.0, "Regular");
         set(&mut credits, "align", ParamValue::Choice(1));
         set(&mut credits, "leading", ParamValue::Float(10.0));

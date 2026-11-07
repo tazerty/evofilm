@@ -464,7 +464,7 @@ fn about_tab(app: &mut EvoFilmApp, ui: &mut egui::Ui) {
     let mut link = |ui: &mut egui::Ui, id: &str, icon: Icon, label: &str, url: &str, primary: bool| {
         let size = egui::vec2(ui.available_width(), if primary { 36.0 } else { 28.0 });
         let (r, resp) = ui.allocate_exact_size(size, egui::Sense::click());
-        let resp = resp.on_hover_text(url);
+        // Evora fork (E1-L5-NOM, EVORA-COR-58): no tooltip with the address, which names the engine
         app.auto.add(&format!("about.{id}"), r, label);
         let bg = if primary {
             if resp.hovered() { t.accent_hover } else { t.accent }

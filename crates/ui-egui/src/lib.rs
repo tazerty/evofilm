@@ -1914,7 +1914,8 @@ impl EvoFilmApp {
                 ui.ctx().request_repaint_after(std::time::Duration::from_secs(1));
             }
         }
-        let hint = if !self.ui.status.is_empty() { self.ui.status.clone() } else { self.hint_text() };
+        // Evora fork (E1-L5-NOM, EVORA-COR-58): engine messages name Corte on screen
+        let hint = if !self.ui.status.is_empty() { crate::i18n::shown(&self.ui.status).to_string() } else { self.hint_text() };
         ui.painter().text(egui::pos2(sb.min.x + 10.0, sb.center().y), egui::Align2::LEFT_CENTER, hint, Tokens::ui(11.0), t.text_dim);
         let resp = ui.interact(sb, egui::Id::new("status-bar"), egui::Sense::click());
         if resp.clicked() {

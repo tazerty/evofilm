@@ -106,7 +106,8 @@ pub fn show_recovery(app: &mut EvoFilmApp, ctx: &egui::Context) -> bool {
 
 pub fn show_revert(app: &mut EvoFilmApp, ctx: &egui::Context) -> bool {
     let t = app.tokens;
-    let file = app.session.path.as_deref().and_then(|p| std::path::Path::new(p).file_name()).map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
+    // Evora fork (E1-L5-NOM, EVORA-COR-58): the project's name, without the extension that names the engine
+    let file = app.session.path.as_deref().map(crate::menus::recent_name).unwrap_or_default();
     let mut open = true;
     let r = egui::Modal::new(egui::Id::new("revert-modal")).frame(modal_frame(&t)).show(ctx, |ui| {
         ui.set_width(460.0);

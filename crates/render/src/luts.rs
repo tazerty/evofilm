@@ -76,7 +76,8 @@ impl Builtin {
             }
             BuiltinKind::Look(n) => Lut3d::from_fn(33, |c| crate::effects::apply_look(n, c).map(|v| v.clamp(0.0, 1.0))),
         };
-        cube.title = format!("EvoFilm {}", self.label);
+        // Evora fork (E-COR-EXPORT-NOM, EVORA-COR-58): exported metadata names the app
+        cube.title = format!("Corte {}", self.label);
         Lut::from_cube(cube)
     }
 }

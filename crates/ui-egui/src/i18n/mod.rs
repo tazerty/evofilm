@@ -235,6 +235,12 @@ pub fn t(text: &str) -> &str {
     current().tr(text)
 }
 
+/// `text` as this build shows it, for a string that does not go through the catalogs (an engine
+/// message, an error): Corte's name, not the engine's (Evora fork, EVORA-COR-58, decision Q-EVO-1).
+pub fn shown(text: &str) -> &str {
+    overrides::rename(text)
+}
+
 /// Match a lowercased search query against both the source and the displayed label.
 pub fn matches_query(text: &str, query: &str) -> bool {
     text.to_lowercase().contains(query) || t(text).to_lowercase().contains(query)
@@ -252,7 +258,14 @@ pub fn tr_ctx<'a>(context: &str, text: &'a str) -> &'a str {
 }
 
 /// Fill `{name}` placeholders. Unknown placeholders are left as written.
+///
+/// Evora fork (EVORA-COR-58): a value filled in can name the engine (an engine message in
+/// "Failed: {e}"), so the result shows Corte's name as well.
 pub fn fmt(template: &str, args: &[(&str, &str)]) -> String {
+    overrides::renamed(fill(template, args))
+}
+
+fn fill(template: &str, args: &[(&str, &str)]) -> String {
     let mut out = String::new();
     let mut rest = template;
     while let Some((prefix, after)) = rest.split_once('{') {

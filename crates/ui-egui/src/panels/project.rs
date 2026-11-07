@@ -409,7 +409,8 @@ fn body(app: &mut EvoFilmApp, ui: &mut egui::Ui, rect: Rect, v: &View, actions: 
         let parent = parent_bin(&app.session.project.root, v.bin);
         navigate(app, v.inst, parent.map(|b| b.0));
     }
-    let mut crumb = format!("{}.evofilm", app.session.project.name);
+    // Evora fork (E1-L5-NOM, EVORA-COR-58): the project's name, without the extension that names the engine
+    let mut crumb = app.session.project.name.clone();
     for b in bin_path(&app.session.project.root, v.bin) {
         crumb.push_str(" / ");
         crumb.push_str(&b);

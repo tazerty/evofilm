@@ -417,7 +417,8 @@ impl Lut {
     pub fn to_3dl(&self) -> Result<String, String> {
         let cube = self.baked_cube(33)?;
         let n = cube.size;
-        let mut s = String::from("# written by EvoFilm\n");
+        // Evora fork (E-COR-EXPORT-NOM, EVORA-COR-58): exported metadata names the app
+        let mut s = String::from("# written by Corte\n");
         if !self.title.is_empty() {
             let _ = writeln!(s, "# {}", self.title);
         }

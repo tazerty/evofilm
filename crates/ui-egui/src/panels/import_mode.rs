@@ -67,7 +67,7 @@ fn recent(app: &mut EvoFilmApp, ui: &mut egui::Ui, rect: Rect, y: f32) -> f32 {
         let row =
             Rect::from_min_size(rect.min + vec2(16.0, y + 16.0 + i as f32 * RECENT_ROW_H), vec2(560.0_f32.min(rect.width() - 32.0).max(0.0), RECENT_ROW_H));
         let name = crate::menus::recent_name(path);
-        let resp = ui.interact(row, egui::Id::new(("imp-recent", i)), Sense::click()).on_hover_text(path.as_str());
+        let resp = ui.interact(row, egui::Id::new(("imp-recent", i)), Sense::click()).on_hover_text(path.strip_suffix(".evofilm").unwrap_or(path));
         app.auto.add(&format!("import.recent.{i}"), row, &name);
         if resp.hovered() {
             ui.painter().rect_filled(row, 4.0, t.hover);

@@ -338,7 +338,7 @@ fn saved_projects_are_listed_in_home_and_open_recent() {
     let menus = d.ok("ui.menu.list", json!({}));
     let recent: Vec<&Value> = menus.as_array().unwrap().iter().filter(|m| m["path"] == json!(["File", "Open Recent"])).collect();
     let labels: Vec<&str> = recent.iter().map(|m| m["label"].as_str().unwrap()).collect();
-    assert_eq!(labels, ["second cut.evofilm", "first cut.evofilm", "Clear Recent Files"]);
+    assert_eq!(labels, ["second cut", "first cut", "Clear Recent Files"]);
     assert_eq!(recent[0]["id"], "file.openRecent.0");
     // File ▸ Open Recent reopens the older one, which moves to the top
     d.menu("file.openRecent.1");
@@ -348,7 +348,7 @@ fn saved_projects_are_listed_in_home_and_open_recent() {
     d.click("header.home");
     let rows = d.ok("ui.elements", json!({"prefix": "import.recent."}));
     let rows: Vec<&str> = rows.as_array().unwrap().iter().map(|e| e["label"].as_str().unwrap()).collect();
-    assert_eq!(rows, ["first cut.evofilm", "second cut.evofilm"]);
+    assert_eq!(rows, ["first cut", "second cut"]);
     d.click("import.recent.1");
     assert_eq!(d.app().session.path.as_deref(), Some(b.as_str()));
     // Clear Recent Files empties both lists

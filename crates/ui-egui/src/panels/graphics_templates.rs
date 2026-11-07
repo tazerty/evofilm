@@ -681,7 +681,7 @@ fn export_dialog(app: &mut EvoFilmApp, ctx: &egui::Context) {
             });
             ui.label(egui::RichText::new(tl!("Saved as a EvoFilm graphics template (.fcgt) in your templates folder.")).weak().size(11.0));
             if !d.error.is_empty() {
-                ui.colored_label(Color32::from_rgb(0xff, 0x80, 0x80), &d.error);
+                ui.colored_label(Color32::from_rgb(0xff, 0x80, 0x80), crate::i18n::shown(&d.error));
             }
             ui.horizontal(|ui| {
                 let ok = ui.button(tl!("Export"));
@@ -766,7 +766,7 @@ fn replace_dialog(app: &mut EvoFilmApp, ctx: &egui::Context) {
                 elems.push(("replaceFonts.to".into(), r.response.rect, "With".into()));
             });
             if !d.error.is_empty() {
-                ui.colored_label(Color32::from_rgb(0xff, 0x80, 0x80), &d.error);
+                ui.colored_label(Color32::from_rgb(0xff, 0x80, 0x80), crate::i18n::shown(&d.error));
             }
             ui.horizontal(|ui| {
                 let ok = ui.button(tl!("OK"));

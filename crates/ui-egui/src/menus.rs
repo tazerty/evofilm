@@ -764,7 +764,9 @@ fn open_recent(items: &mut Vec<MenuItem>, session: &evofilm_engine::Session, tr:
 
 /// A recent project as listed in File ▸ Open Recent and on Home: its file name.
 pub fn recent_name(path: &str) -> String {
-    std::path::Path::new(path).file_name().map_or_else(|| path.to_string(), |n| n.to_string_lossy().into_owned())
+    // Evora fork (E1-L5-NOM, EVORA-COR-58): without the extension that names the engine
+    let shown = path.strip_suffix(".evofilm").unwrap_or(path);
+    std::path::Path::new(shown).file_name().map_or_else(|| shown.to_string(), |n| n.to_string_lossy().into_owned())
 }
 
 /// The menu bar as it ships, without a running app: English labels, default preferences, the

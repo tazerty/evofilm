@@ -163,6 +163,7 @@ impl eframe::App for WebApp {
         for f in actions {
             f(self, ctx);
         }
+        name_demo_project(&mut self.app.session);
         self.app.logic(ctx, frame);
         // Evora fork (patch COR-FK-B2): labels, keys and theme report follow inside Evora's shell
         if opfs::hosted() {
@@ -183,6 +184,22 @@ impl eframe::App for WebApp {
     fn ui(&mut self, ui: &mut egui::Ui, frame: &mut eframe::Frame) {
         self.app.ui(ui, frame);
         drop_open_urls(ui.ctx());
+    }
+}
+
+/// The demo project as the engine names it, and as this build shows it (EVORA-COR-58, decision
+/// Q-EVO-1).
+const DEMO_ENGINE_NAME: &str = "EvoFilm Demo";
+const DEMO_SHOWN_NAME: &str = "Corte Demo";
+
+/// A project's name is data: the display renaming (`i18n::shown`) does not reach it, and a name the
+/// user chose stays as it is. So the demo project gets its name as soon as it is open: no edit, no
+/// undo step, not dirty.
+fn name_demo_project(session: &mut Session) {
+    if session.project.name == DEMO_ENGINE_NAME {
+        let project = Arc::make_mut(&mut session.project);
+        project.name = DEMO_SHOWN_NAME.to_string();
+        project.root.name = DEMO_SHOWN_NAME.to_string();
     }
 }
 
@@ -329,7 +346,8 @@ pub async fn start(canvas_id: String) -> Result<(), JsValue> {
                         Ok(_) => {
                             // the recovered changes are unsaved
                             session.saved_revision = 0;
-                            toast = Some(format!("Recovered unsaved changes to {name}"));
+                            // EVORA-COR-58: the project's name, without the extension that names the engine
+                            toast = Some(format!("Recovered unsaved changes to {}", name.strip_suffix(".evofilm").unwrap_or(&name)));
                         }
                         Err(e) => log::warn!("recovery failed: {e}"),
                     }

@@ -564,7 +564,7 @@ pub fn show(app: &mut EvoFilmApp, ctx: &egui::Context) {
             _ => {}
         }
         if !d.error.is_empty() {
-            ui.colored_label(egui::Color32::from_rgb(0xe0, 0x60, 0x60), &d.error);
+            ui.colored_label(egui::Color32::from_rgb(0xe0, 0x60, 0x60), crate::i18n::shown(&d.error));
         }
         ui.add_space(6.0);
         ui.horizontal(|ui| {

@@ -791,8 +791,8 @@ fn footer(app: &mut EvoFilmApp, ui: &mut egui::Ui, t: &Tokens) -> Option<bool> {
             } else {
                 app.shortcut_editor.message.clone()
             };
-            let r = ui.label(RichText::new(msg.clone()).size(12.0).color(t.text_dim));
-            app.auto.add("shortcuts.message", r.rect, &msg);
+            let r = ui.label(RichText::new(crate::i18n::shown(&msg)).size(12.0).color(t.text_dim));
+            app.auto.add("shortcuts.message", r.rect, crate::i18n::shown(&msg));
         });
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
             let ok = ui.add(

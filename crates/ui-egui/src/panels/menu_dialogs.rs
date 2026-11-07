@@ -685,7 +685,7 @@ pub fn show(app: &mut EvoFilmApp, ctx: &egui::Context) {
             }
             "clip.sourceSettings" => {
                 ui.label(tlf!("Codec: {codec}", codec = d.info["codec"].as_str().unwrap_or_default()));
-                ui.label(RichText::new(d.info["message"].as_str().unwrap_or_default()).weak());
+                ui.label(RichText::new(crate::i18n::shown(d.info["message"].as_str().unwrap_or_default())).weak());
             }
             "clip.updateMetadata" => {
                 ui.label(tlf!("Write the metadata of the selected clip(s) ({n}) to XMP files next to their media?", n = d.info["count"]));
@@ -778,7 +778,7 @@ pub fn show(app: &mut EvoFilmApp, ctx: &egui::Context) {
             }
             "help.systemCompatibilityReport" => {
                 let r = &d.info;
-                ui.label(RichText::new(r["app"].as_str().unwrap_or_default()).strong());
+                ui.label(RichText::new(crate::i18n::shown(r["app"].as_str().unwrap_or_default())).strong());
                 for c in r["checks"].as_array().cloned().unwrap_or_default() {
                     let ok = c["ok"].as_bool().unwrap_or(false);
                     ui.label(format!(
@@ -810,7 +810,7 @@ pub fn show(app: &mut EvoFilmApp, ctx: &egui::Context) {
             _ => {}
         }
         if !d.error.is_empty() {
-            ui.colored_label(egui::Color32::from_rgb(0xe0, 0x60, 0x60), &d.error);
+            ui.colored_label(egui::Color32::from_rgb(0xe0, 0x60, 0x60), crate::i18n::shown(&d.error));
         }
         ui.add_space(6.0);
         ui.horizontal(|ui| {

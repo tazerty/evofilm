@@ -346,10 +346,11 @@ pub(crate) fn write(doc: &Document, report: &mut Report) -> Result<Vec<u8>> {
         w.report.info("some times are not on whole samples / frames and were rounded");
     }
     let ident = w.obj(b"IDNT");
-    w.str(ident, "OMFI:IDNT:CompanyName", "EvoFilm");
-    w.str(ident, "OMFI:IDNT:ProductName", "EvoFilm");
+    // Evora fork (E-COR-EXPORT-NOM, EVORA-COR-58): exported metadata names the app
+    w.str(ident, "OMFI:IDNT:CompanyName", "Corte");
+    w.str(ident, "OMFI:IDNT:ProductName", "Corte");
     w.str(ident, "OMFI:IDNT:ProductVersionString", env!("CARGO_PKG_VERSION"));
-    w.str(ident, "OMFI:IDNT:Platform", "EvoFilm");
+    w.str(ident, "OMFI:IDNT:Platform", "Corte");
     w.b.set(ident, "OMFI:IDNT:Date", "omfi:TimeStamp", &[0, 0, 0, 0, 1]);
     let head = w.obj(b"HEAD");
     w.b.set(head, "OMFI:HEAD:ByteOrder", "omfi:Int16", &0x4D4Di16.to_be_bytes());
