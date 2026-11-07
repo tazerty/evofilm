@@ -280,7 +280,8 @@ mod tests {
     fn the_slider_keeps_the_ratio_and_reaches_both_ends() {
         let mut v = TimelineView::default();
         let ratio = v.video_track_h / v.audio_track_h;
-        set_position(&mut v, position(&v) + 0.1);
+        let up = position(&v) + 0.1;
+        set_position(&mut v, up);
         assert!(v.video_track_h > 60.0 && v.audio_track_h > 56.0);
         assert!((v.video_track_h / v.audio_track_h - ratio).abs() < 1e-3);
         set_position(&mut v, 0.0);
