@@ -431,7 +431,8 @@ jobs:
           # Exclu : test amont qui exige une police japonaise installée sur le système (Noto Sans
           # CJK JP) ou evo-fonts ; sans rapport avec les patchs Evora. À réactiver avec E6.
           # COR-FK-B2 : theme::evora:: (palette d'Evora, contrastes sur les 360 palettes D-38).
-          cargo test --locked -p evofilm-ui-egui --lib -- 'i18n::' 'links::' 'theme::evora::' \
+          # EVORA-COR-59 : panels::timeline_zoom:: (zoom vertical de la timeline, en-têtes compacts).
+          cargo test --locked -p evofilm-ui-egui --lib -- 'i18n::' 'links::' 'theme::evora::' 'panels::timeline_zoom::' \
             --skip 'i18n::tests::language_commands_switch_and_persist_without_a_document'
 
       - name: Liens à l'écran (test d'interface sans GPU)

@@ -262,3 +262,31 @@ zh-cn	Timeline: (no sequences)	时间轴：无序列
 it	Timeline: (no sequences)	Timeline: nessuna sequenza
 ko	Timeline: (no sequences)	타임라인: 시퀀스 없음
 de	Timeline: (no sequences)	Timeline: keine Sequenzen
+
+# --- EVORA-COR-59: the Timeline's vertical zoom (panels/timeline_zoom.rs) ---------------------
+# Evora's own strings: no upstream catalog has them (the well-formedness test reads them from
+# timeline_zoom::STRINGS).
+en	Track Height	Track Height
+es	Track Height	Altura de las pistas
+fr	Track Height	Hauteur des pistes
+id	Track Height	Tinggi trek
+ja	Track Height	トラックの高さ
+pt-br	Track Height	Altura das faixas
+zh-cn	Track Height	轨道高度
+it	Track Height	Altezza delle tracce
+ko	Track Height	트랙 높이
+de	Track Height	Spurhöhe
+ru	Track Height	Высота дорожек
+uk	Track Height	Висота доріжок
+en	Drag, scroll or use the arrow keys to change the height of all tracks. Double-click: original height.	Drag, scroll or use the arrow keys to change the height of all tracks. Double-click: original height.
+es	Drag, scroll or use the arrow keys to change the height of all tracks. Double-click: original height.	Arrastre, desplace o use las flechas para cambiar la altura de todas las pistas. Doble clic: altura original.
+fr	Drag, scroll or use the arrow keys to change the height of all tracks. Double-click: original height.	Glissez, faites défiler ou utilisez les flèches pour changer la hauteur de toutes les pistes. Double-clic : hauteur d'origine.
+id	Drag, scroll or use the arrow keys to change the height of all tracks. Double-click: original height.	Seret, gulir, atau gunakan tombol panah untuk mengubah tinggi semua trek. Klik ganda: tinggi semula.
+ja	Drag, scroll or use the arrow keys to change the height of all tracks. Double-click: original height.	ドラッグ、スクロール、または矢印キーですべてのトラックの高さを変更します。ダブルクリック: 元の高さ。
+pt-br	Drag, scroll or use the arrow keys to change the height of all tracks. Double-click: original height.	Arraste, role ou use as setas para alterar a altura de todas as faixas. Clique duplo: altura original.
+zh-cn	Drag, scroll or use the arrow keys to change the height of all tracks. Double-click: original height.	拖动、滚动或使用方向键更改所有轨道的高度。双击：恢复原始高度。
+it	Drag, scroll or use the arrow keys to change the height of all tracks. Double-click: original height.	Trascina, scorri o usa i tasti freccia per cambiare l'altezza di tutte le tracce. Doppio clic: altezza originale.
+ko	Drag, scroll or use the arrow keys to change the height of all tracks. Double-click: original height.	드래그하거나 스크롤하거나 화살표 키로 모든 트랙의 높이를 바꿉니다. 더블클릭: 원래 높이.
+de	Drag, scroll or use the arrow keys to change the height of all tracks. Double-click: original height.	Ziehen, scrollen oder mit den Pfeiltasten die Höhe aller Spuren ändern. Doppelklick: ursprüngliche Höhe.
+ru	Drag, scroll or use the arrow keys to change the height of all tracks. Double-click: original height.	Перетащите, прокрутите или используйте клавиши со стрелками, чтобы изменить высоту всех дорожек. Двойной щелчок: исходная высота.
+uk	Drag, scroll or use the arrow keys to change the height of all tracks. Double-click: original height.	Перетягніть, прокрутіть або скористайтеся клавішами зі стрілками, щоб змінити висоту всіх доріжок. Подвійне клацання: початкова висота.

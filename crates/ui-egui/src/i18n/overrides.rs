@@ -173,8 +173,10 @@ mod tests {
             assert_eq!(src.ends_with('…'), display.ends_with('…'), "{lang}: ellipsis differs in {src:?} → {display:?}");
             // every overridden source has an English override, shown where no translation exists
             assert!(entries.iter().any(|(l, s, _)| l == "en" && s == src), "no English override for {src:?}");
-            // and is a string the interface really asks for (no dead override)
-            assert!(Language::ALL.iter().any(|l| l.has(src)) || engine.contains(src), "override of a string nothing displays: {src:?}");
+            // and is a string the interface really asks for (no dead override); EVORA-COR-59: the
+            // fork's own strings, which no upstream catalog has, are listed by their module
+            let own = crate::panels::timeline_zoom::STRINGS.contains(&src.as_str());
+            assert!(Language::ALL.iter().any(|l| l.has(src)) || engine.contains(src) || own, "override of a string nothing displays: {src:?}");
         }
     }
 

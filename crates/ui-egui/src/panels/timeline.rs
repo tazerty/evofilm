@@ -77,6 +77,9 @@ pub struct TlState {
     zoom_anchor: Option<(f64, f32)>,
     /// The zoom (points a second) the video thumbnails are laid out at while the view is zooming (#1094).
     thumb_pps: Option<f64>,
+    /// Evora fork (EVORA-COR-59): where the vertical zoom was drawn this frame (host mode). The
+    /// wheel over it changes the track heights instead of scrolling the tracks.
+    track_zoom: Option<Rect>,
     /// Show Duplicate Frame Markers: the markers of a sequence, with the session revision, the
     /// sequence and the project they were worked out for.
     duplicates: Option<(DuplicatesKey, DuplicateMarkers)>,
@@ -1439,29 +1442,36 @@ fn draw_headers(app: &mut EvoFilmApp, ui: &mut egui::Ui, seq: &Sequence, rows: &
         }
         let label = format!("{}{}", if r.kind == TrackKind::Video { "V" } else { "A" }, r.index + 1);
         let btn_rect = |x0: f32| Rect::from_min_max(pos2(hrect.min.x + x0, hrect.min.y + 1.0), pos2(hrect.min.x + x0 + 24.0, hrect.max.y - 2.0));
+        // Evora fork (EVORA-COR-59): a short track's header (host mode) keeps its name and its output
+        // toggle only (the eye, or Mute); the other controls come back as the track grows
+        let compact = super::timeline_zoom::compact(hrect.height());
         // 1. source patch (absent when unpatched)
         let patched = if r.kind == TrackKind::Video { tg.video_dest == Some(r.track) } else { tg.audio_dest == Some(r.track) };
         let pr = btn_rect(13.0);
-        app.auto.add(&format!("timeline.track.{label}.sourcePatch"), pr, "Source patch");
-        if patch_button(ui, pr, visible, &label, patched, false, egui::Id::new(("patch", r.track.0)), t).clicked() {
-            actions.push(("timeline.setTargeting".into(), json!({"track": r.track.0, "sourcePatch": !patched})));
+        if !compact {
+            app.auto.add(&format!("timeline.track.{label}.sourcePatch"), pr, "Source patch");
+            if patch_button(ui, pr, visible, &label, patched, false, egui::Id::new(("patch", r.track.0)), t).clicked() {
+                actions.push(("timeline.setTargeting".into(), json!({"track": r.track.0, "sourcePatch": !patched})));
+            }
         }
         // 2. track lock
         let small = |x: f32, y: f32| Rect::from_center_size(pos2(hrect.min.x + x, y), vec2(18.0, 18.0));
         let upper_y = hrect.min.y + (16.0f32).min(hrect.height() / 2.0);
         let lock_r = small(49.0, hrect.center().y);
-        let lresp = crate::widgets::icon_toggle(
-            ui,
-            lock_r.intersect(visible),
-            if tr.locked { Icon::Lock } else { Icon::Unlock },
-            true,
-            t,
-            egui::Id::new(("locked", r.track.0)),
-            Some(if tr.locked { t.icon_active } else { t.text_dim }),
-        );
-        app.auto.add(&format!("timeline.track.{label}.locked"), lock_r, "Toggle Track Lock");
-        if lresp.clicked() {
-            actions.push(("timeline.setTrack".into(), json!({"track": r.track.0, "locked": !tr.locked})));
+        if !compact {
+            let lresp = crate::widgets::icon_toggle(
+                ui,
+                lock_r.intersect(visible),
+                if tr.locked { Icon::Lock } else { Icon::Unlock },
+                true,
+                t,
+                egui::Id::new(("locked", r.track.0)),
+                Some(if tr.locked { t.icon_active } else { t.text_dim }),
+            );
+            app.auto.add(&format!("timeline.track.{label}.locked"), lock_r, "Toggle Track Lock");
+            if lresp.clicked() {
+                actions.push(("timeline.setTrack".into(), json!({"track": r.track.0, "locked": !tr.locked})));
+            }
         }
         if tr.locked {
             // diagonal hatch over locked lanes is drawn by the lane painter; here a subtle tint
@@ -1470,18 +1480,22 @@ fn draw_headers(app: &mut EvoFilmApp, ui: &mut egui::Ui, seq: &Sequence, rows: &
         // 3. target
         let targeted = tg.targeted.contains(&r.track);
         let trr = btn_rect(61.0);
-        app.auto.add(&format!("timeline.track.{label}.target"), trr, "Toggle track targeting");
-        if patch_button(ui, trr, visible, &label, targeted, true, egui::Id::new(("target", r.track.0)), t).clicked() {
-            actions.push(("timeline.setTargeting".into(), json!({"track": r.track.0, "targeted": !targeted})));
+        if !compact {
+            app.auto.add(&format!("timeline.track.{label}.target"), trr, "Toggle track targeting");
+            if patch_button(ui, trr, visible, &label, targeted, true, egui::Id::new(("target", r.track.0)), t).clicked() {
+                actions.push(("timeline.setTargeting".into(), json!({"track": r.track.0, "targeted": !targeted})));
+            }
         }
         // 4. upper line icons
         let mut x = 102.0;
         let sr = small(x, upper_y);
-        let sresp =
-            crate::widgets::icon_toggle(ui, sr.intersect(visible), Icon::SyncLock, tr.sync_lock, t, egui::Id::new(("syncLock", r.track.0)), Some(t.text_dim));
-        app.auto.add(&format!("timeline.track.{label}.syncLock"), sr, "Toggle Sync Lock");
-        if sresp.clicked() {
-            actions.push(("timeline.setTrack".into(), json!({"track": r.track.0, "syncLock": !tr.sync_lock})));
+        if !compact {
+            let sresp =
+                crate::widgets::icon_toggle(ui, sr.intersect(visible), Icon::SyncLock, tr.sync_lock, t, egui::Id::new(("syncLock", r.track.0)), Some(t.text_dim));
+            app.auto.add(&format!("timeline.track.{label}.syncLock"), sr, "Toggle Sync Lock");
+            if sresp.clicked() {
+                actions.push(("timeline.setTrack".into(), json!({"track": r.track.0, "syncLock": !tr.sync_lock})));
+            }
         }
         x += 24.0;
         if r.kind == TrackKind::Video {
@@ -1514,30 +1528,36 @@ fn draw_headers(app: &mut EvoFilmApp, ui: &mut egui::Ui, seq: &Sequence, rows: &
             if mresp.clicked() {
                 actions.push(("timeline.setTrack".into(), json!({"track": r.track.0, "muted": !tr.muted})));
             }
-            let s2 = Rect::from_center_size(pos2(hrect.min.x + x + 20.0, upper_y), vec2(14.0, 14.0));
-            let so = crate::widgets::letter_toggle(
-                ui,
-                s2.intersect(visible),
-                "S",
-                tr.solo,
-                Color32::from_rgb(0xf0, 0xf0, 0x4f),
-                t,
-                egui::Id::new(("solo", r.track.0)),
-            );
-            app.auto.add(&format!("timeline.track.{label}.solo"), s2, "Solo Track");
-            if so.clicked() {
-                actions.push(("timeline.setTrack".into(), json!({"track": r.track.0, "solo": !tr.solo})));
+            if !compact {
+                let s2 = Rect::from_center_size(pos2(hrect.min.x + x + 20.0, upper_y), vec2(14.0, 14.0));
+                let so = crate::widgets::letter_toggle(
+                    ui,
+                    s2.intersect(visible),
+                    "S",
+                    tr.solo,
+                    Color32::from_rgb(0xf0, 0xf0, 0x4f),
+                    t,
+                    egui::Id::new(("solo", r.track.0)),
+                );
+                app.auto.add(&format!("timeline.track.{label}.solo"), s2, "Solo Track");
+                if so.clicked() {
+                    actions.push(("timeline.setTrack".into(), json!({"track": r.track.0, "solo": !tr.solo})));
+                }
+                let vr = small(x + 42.0, upper_y);
+                if let Some(a) = super::voiceover::header_button(app, ui, r.track, vr, visible, &label, t) {
+                    vo_action = Some(a);
+                }
+                let kr = small(x + 64.0, upper_y);
+                super::timeline_automation::header_button(app, ui, seq, r, kr, visible, &label, t);
             }
-            let vr = small(x + 42.0, upper_y);
-            if let Some(a) = super::voiceover::header_button(app, ui, r.track, vr, visible, &label, t) {
-                vo_action = Some(a);
-            }
-            let kr = small(x + 64.0, upper_y);
-            super::timeline_automation::header_button(app, ui, seq, r, kr, visible, &label, t);
         }
         // 5. name on the lower line (or inline when short)
         if hrect.height() >= 40.0 {
             p.text(pos2(hrect.min.x + 94.0, hrect.min.y + 34.0), Align2::LEFT_CENTER, &tr.name, Tokens::ui(11.0), t.text_dim);
+        } else if compact {
+            // a compact header: the name after the colour strip, up to the output toggle
+            let room = Rect::from_min_max(pos2(hrect.min.x + 13.0, hrect.min.y), pos2(hrect.min.x + 113.0, hrect.max.y));
+            p.with_clip_rect(room).text(pos2(room.min.x, hrect.center().y), Align2::LEFT_CENTER, &tr.name, Tokens::ui(11.0), t.text_dim);
         }
         // resize track height by dragging the header's bottom edge, or the outer edge of the top video
         // track or the last audio track, which also reaches into the empty space past it
@@ -1606,9 +1626,16 @@ fn draw_top(app: &mut EvoFilmApp, ui: &mut egui::Ui, rect: Rect, seq: &Sequence,
     let ruler = layout.ruler;
     // background of the whole top block
     p.rect_filled(Rect::from_min_max(rect.min, pos2(rect.max.x, ruler.max.y)), 0.0, t.panel_bg);
+    // Evora fork (EVORA-COR-59): in host mode the right end of the block holds the vertical zoom
+    // (`timeline_zoom`); the timecode field and the toolbar make room for it.
+    let zoom = crate::theme::evora_enabled().then(|| {
+        Rect::from_min_max(pos2(rect.min.x + hw - super::timeline_zoom::WIDTH - 2.0, rect.min.y + 6.0), pos2(rect.min.x + hw - 2.0, ruler.max.y - 6.0))
+    });
+    app.tl.track_zoom = zoom;
     // current timecode: Premiere's big blue timecode
     let tc = format_time(app.session.playhead(), rate, seq.settings.drop_frame, TimeDisplay::Timecode, seq.settings.sample_rate as i64);
-    let tc_rect = Rect::from_min_size(pos2(rect.min.x + 14.0, rect.min.y + 4.0), vec2(hw - 20.0, 20.0));
+    let tc_w = hw - 20.0 - zoom.map_or(0.0, |z| z.width() + 4.0);
+    let tc_rect = Rect::from_min_size(pos2(rect.min.x + 14.0, rect.min.y + 4.0), vec2(tc_w, 20.0));
     let tc_id = egui::Id::new(("timeline-tc", seq_id));
     match crate::widgets::timecode_field(ui, tc_id, tc_rect, &tc, app.session.playhead(), Tick::ZERO, rate, seq.settings.drop_frame, t.timecode) {
         Some(Ok(time)) => {
@@ -1620,9 +1647,11 @@ fn draw_top(app: &mut EvoFilmApp, ui: &mut egui::Ui, rect: Rect, seq: &Sequence,
         None => {}
     }
     app.auto.add("timeline.timecode", tc_rect, &tc);
-    // toolbar: 30 × 30 buttons, "on" = #4b4b4b fill
-    let mut x = rect.min.x + 12.0;
-    let y = rect.min.y + 26.0;
+    // toolbar: 30 × 30 buttons, "on" = #4b4b4b fill; with the vertical zoom, 26-point buttons a
+    // point apart (the icons keep their size)
+    let (x0, y0, pitch, side, inset) = if zoom.is_some() { (8.0, 27.0, 27.0, 26.0, 6.0) } else { (12.0, 26.0, 30.0, 28.0, 7.0) };
+    let mut x = rect.min.x + x0;
+    let y = rect.min.y + y0;
     let toggles: [(Icon, &str, bool, bool, &str); 6] = [
         (Icon::Nest, "nest", !app.session.state.sequences_as_clips, true, tl!("Insert and overwrite sequences as nests or individual clips")),
         (Icon::Magnet, "snap", app.session.state.snapping, true, tl!("Snap in Timeline (S)")),
@@ -1632,7 +1661,7 @@ fn draw_top(app: &mut EvoFilmApp, ui: &mut egui::Ui, rect: Rect, seq: &Sequence,
         (Icon::Wrench, "settings", false, false, tl!("Timeline Display Settings")),
     ];
     for (icon, key, on, toggle, tip) in toggles {
-        let r = Rect::from_min_size(pos2(x, y), vec2(28.0, 28.0));
+        let r = Rect::from_min_size(pos2(x, y), vec2(side, side));
         let resp = ui.interact(r, egui::Id::new(("tl-toggle", key)), Sense::click()).on_hover_text(tip);
         app.auto.add(&format!("timeline.toggle.{key}"), r, tip);
         if toggle && on {
@@ -1640,7 +1669,7 @@ fn draw_top(app: &mut EvoFilmApp, ui: &mut egui::Ui, rect: Rect, seq: &Sequence,
         } else if resp.hovered() {
             p.rect_filled(r, 4.0, t.hover);
         }
-        icons::paint(&p, r.shrink(7.0), icon, if toggle && on { t.text } else { t.text_dim });
+        icons::paint(&p, r.shrink(inset), icon, if toggle && on { t.text } else { t.text_dim });
         if resp.clicked() {
             let _ = match key {
                 "nest" => app.session.execute("sequence.nestSequences", json!({})),
@@ -1691,7 +1720,10 @@ fn draw_top(app: &mut EvoFilmApp, ui: &mut egui::Ui, rect: Rect, seq: &Sequence,
                 }
             });
         }
-        x += 30.0;
+        x += pitch;
+    }
+    if let Some(area) = zoom {
+        super::timeline_zoom::show(app, ui, area, t);
     }
     // ----- ruler: markers row · labels · ticks · 2 pt render bar
     let clip = p.with_clip_rect(ruler);
@@ -2451,8 +2483,10 @@ fn interact(app: &mut EvoFilmApp, ui: &mut egui::Ui, seq: &Sequence, layout: &La
     //   Option + wheel   zoom about the pointer
     // Settings ▸ Timeline ▸ Timeline Mouse Scrolling "Horizontal" swaps the first two. A sideways
     // gesture (trackpad swipe, tilt wheel, Shift + wheel) always scrolls sideways; a pinch zooms.
+    // Evora fork (EVORA-COR-59): over the vertical zoom, the wheel belongs to it (`timeline_zoom`).
     if ui.rect_contains_pointer(rect)
         && let Some(p) = ctx.pointer_hover_pos()
+        && !app.tl.track_zoom.is_some_and(|z| z.contains(p))
     {
         let w = wheel_input(&ctx);
         if (w.pinch - 1.0).abs() > 1e-4 || (w.alt && w.delta.y != 0.0) {

@@ -1555,6 +1555,13 @@ impl EvoFilmApp {
             .any(|e| e.response_id == Some(focused) && (e.id.starts_with("dock.gutter.") || (e.id.starts_with("panel.float.") && e.id.ends_with(".resize"))))
     }
 
+    /// Evora fork (EVORA-COR-59): whether keyboard focus is on the Timeline's vertical zoom, as drawn
+    /// last pass.
+    fn track_zoom_focused(&self, ctx: &egui::Context) -> bool {
+        let Some(focused) = ctx.memory(|m| m.focused()) else { return false };
+        self.auto.previous.iter().any(|e| e.response_id == Some(focused) && e.id == panels::timeline_zoom::AUTO_ID)
+    }
+
     fn handle_shortcuts(&mut self, ctx: &egui::Context) {
         let workspaces = (dock::names(&self.workspaces), self.ui.workspace.clone());
         if self.bindings_rev != self.session.shortcuts.revision || workspaces != self.menu_workspaces {
@@ -1565,7 +1572,10 @@ impl EvoFilmApp {
         // A pane divider or floating-panel grip keeps focus after a pointer drag so arrows can
         // nudge it, but it takes no other key: Space and the other shortcuts keep working (#1482).
         let divider_focused = self.divider_focused(ctx);
-        if (ctx.egui_wants_keyboard_input() && !divider_focused) || self.dialog == Some(Dialog::Shortcuts) {
+        // Evora fork (EVORA-COR-59): so does the Timeline's vertical zoom, which takes its own keys
+        // (arrows, Page Up / Page Down, Home, End) and leaves Space and the others to the shortcuts.
+        let zoom_focused = self.track_zoom_focused(ctx);
+        if (ctx.egui_wants_keyboard_input() && !divider_focused && !zoom_focused) || self.dialog == Some(Dialog::Shortcuts) {
             return;
         }
         // A focused text field takes every unmodified key, including the ones our shortest
@@ -1626,6 +1636,10 @@ impl EvoFilmApp {
                 }
                 // The focused divider consumes the arrows itself (egui matches them with any Shift/Alt).
                 if divider_focused && matches!(k, egui::Key::ArrowLeft | egui::Key::ArrowRight | egui::Key::ArrowUp | egui::Key::ArrowDown) {
+                    continue;
+                }
+                // (an unmodified key only: Ctrl+Home and other chords stay shortcuts)
+                if zoom_focused && m.is_none() && panels::timeline_zoom::takes_key(*k) {
                     continue;
                 }
                 if i.consume_key(*m, *k) {
